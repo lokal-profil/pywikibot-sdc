@@ -1,0 +1,21 @@
+sudo: false
+dist: xenial  # required for Python >= 3.7
+language: python
+matrix:
+  include:
+    - python: 2.7
+      env:
+         - TOX_ENV=travis
+    - python: 3.7
+      env:
+         - TOX_ENV=travis
+    - python: 3.8
+      env:
+         - TOX_ENV=travis
+    - python: 3.9
+      env:
+         - TOX_ENV=travis
+install:
+ - pip install tox-travis
+script:
+ - tox -e $TOX_ENV

@@ -1,0 +1,18 @@
+# Python
+*.pyc
+
+# output files
+*.wiki
+*.info
+*.log
+
+# CI
+.coverage
+.tox
+
+# pywikibot
+*secretPasswords
+user-config.py
+*.ctrl
+*.lwp
+apicache
