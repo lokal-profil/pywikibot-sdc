@@ -16,6 +16,7 @@ matrix:
       env:
          - TOX_ENV=travis
 install:
+ - pip install codecov
  - pip install tox-travis
 script:
  - tox -e $TOX_ENV
