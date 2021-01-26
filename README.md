@@ -1,6 +1,27 @@
-# SDC in-data format
+Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.svg?branch=master)](https://travis-ci.org/lokal-profil/pywikibot-sdc)
+=======
 
-## Main structure
+Support functionality to allow upload of Structured Data to [Wikimedia Commons](https://commons.wikimedia.org)
+by making use of Pywikibot internals.
+
+This is primarily intended as a stop-gap measure until proper support is
+implemented in Pywikibot [T223820](https://phabricator.wikimedia.org/T223820).
+
+Heavily inspired by the following hack by Abbe98:
+<https://byabbe.se/2020/09/15/writing-structured-data-on-commons-with-python>
+
+
+## To install
+
+You can install `pywikibot-sdc` via `pip` using:
+`pip install git+https://github.com/lokal-profil/pywikibot-sdc.git`
+
+If it is your first time running pywikibot you will also have to set up a
+`user-config.py` file.
+
+## SDC in-data format
+
+### Main structure
 
 The in-data is expected as a json-like dictionary entry where the main keys are
 `edit_summary`, `caption` and the *Pid*s of any claims that are added.
@@ -21,7 +42,7 @@ Short example:
 For a more extensive example suited for test-upload to [Beta Commons](https://commons.wikimedia.beta.wmflabs.org/)
 see [docs/SDC_beta_commons_demo.json](docs/SDC_beta_commons_demo.json).
 
-### edit_summary
+#### edit_summary
 
 The `edit_summary` field is a simple text field used to provide an edit summary
 when the data is uploaded. You can use `{count}` in the string to include the
@@ -31,14 +52,14 @@ default one below is used:
 
 `'Added {count} structured data statement(s) to recent upload'`
 
-### caption
+#### caption
 
 The `caption` field takes the form of a simple dictionary where the keys are the
 [language codes](https://www.wikidata.org/wiki/Help:Wikimedia_language_codes/lists/all)
 and the values are plain text strings. This data is used to set the *caption*
 (*label* in Wikibase lingo) of the file.
 
-### Pid claims
+#### Pid claims
 
 Pid/Property claims can be provided in up to three formats depending on the data
 type of the property and if any qualifiers are provided.
@@ -89,7 +110,7 @@ Note that even when the `<value>` is numeric it must be provided as a string.
 Any keys provided other than the ones described above (on the main level or
 inside claims) are ignored.
 
-## Data type formats
+### Data type formats
 
 How a value is interpreted is based on the Property for which it is provided, the
 expected data type is loaded from the underlying Wikibase installation itself.
@@ -97,7 +118,7 @@ expected data type is loaded from the underlying Wikibase installation itself.
 This tool does not do any data validation so if you pass it rubbish which sort of
 looks right you'll hopefully get complaints from pywikibot or the MediaWiki API.
 
-### Simple string values
+#### Simple string values
 
 Many data types simply consist of a string value. This includes:
 external identifiers, urls, math notation, musical notation and strings.
@@ -114,7 +135,7 @@ Additionally [items](#items), [Commons media](#commons-media), unitless [quantit
 can be supplied as simple strings here. The assumptions made for this convenience
 are described in the relevant sections below.
 
-### Items
+#### Items
 
 For this data types the [Qid](https://www.wikidata.org/wiki/Wikidata:Glossary#QID)
 of the item is supplied as a simple string. The site on which the item is expected
@@ -124,7 +145,7 @@ on [Beta Wikidata](https://wikidata.beta.wmflabs.org/wiki/).
 
 Example: `"Q42"`
 
-### Commons media
+#### Commons media
 
 For this data type the page name is supplied as a simple string. The "File:" namespace
 prefix of the page name is optional. The data page will always be expected to live
@@ -132,7 +153,7 @@ Wikimedia Commons, independently on which wiki your are writing structured data 
 
 Example values: `"File:Exempel_WIKI.jpg"` or `"Exempel_WIKI.jpg"`.
 
-### Tabular data / Geo shapes
+#### Tabular data / Geo shapes
 
 For these two data types the page name is supplied as a simple string. The "Data:"
 namespace prefix of the page name must be included. The site on which the pages must
@@ -143,7 +164,7 @@ to live on "normal" Wikimedia Commons.
 
 Example values: `"Data:DateI18n.tab"` or `"Data:Sweden.map"`.
 
-### Point in time / Date
+#### Point in time / Date
 
 A date can be provided either using an ISO_8601 string or a timestamp string. In
 either case the largest precision that will be used is that of a day (due to Wikidata's
@@ -154,7 +175,7 @@ Example values:
 *   Year adnd month only: `2020-12`
 *   Year only: `2020`
 
-### Monolingual text
+#### Monolingual text
 
 Monolingual text requires the value be supplied as a dictionary with the keys
 `text` (a plain text string) and `lang` is the [language code](https://www.wikidata.org/wiki/Help:Monolingual_text_languages).
@@ -173,7 +194,7 @@ Example values:
 }
 ```
 
-### Quantity
+#### Quantity
 
 Quantities can either be supplied with or without units. If no unit is to be used
 then the value must be supplied as a plain string using "." as a decimal sign.
@@ -192,10 +213,10 @@ Example (using [kg](https://www.wikidata.org/wiki/Q11570) as the unit):
 }
 ```
 
-### Coordinates
+#### Coordinates
 
 Coordinates are supplied as as a dictionary with `lat` and `lon` keys where the
-longitude and latitude values are provided as strings in decimal format.  
+longitude and latitude values are provided as strings in decimal format.
 Example:
 ```json
 {
