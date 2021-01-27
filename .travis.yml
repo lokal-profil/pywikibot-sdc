@@ -1,7 +1,7 @@
-sudo: false
+os: linux
 dist: xenial  # required for Python >= 3.7
 language: python
-matrix:
+jobs:
   include:
     - python: 2.7
       env:
