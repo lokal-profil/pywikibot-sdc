@@ -19,12 +19,33 @@ You can install `pywikibot-sdc` via `pip` using:
 If it is your first time running pywikibot you will also have to set up a
 `user-config.py` file.
 
+## To use
+
+In it's most simple form call `sdc_support.upload_single_sdc_data(file_page, sdc_data)`
+with a `pywikibot.FilePage` object (or just the filename as a string) of a
+newly uploaded file and the associated structured data to upload (in the format
+described [below](#sdc-in-data-format)).
+
+To upload data to a file that already contains some structured data add the
+`strategy` argument to the call using one of the [named merge strategies](#merge-strategies).
+
+### Merge strategies
+There are three allowed strategies for merging the provided data with any
+pre-existing data.
+*   `None` (default): Only upload the data if no prior data exists
+*   `"New"`: Only upload the data if there is no prior data for that claim. I.e.
+        no prior statements for a particular Pid or no caption for a particular
+        language.
+*   `"Blind"` (not generally recommended): Upload the data without regards to
+        what is already there. May overwrite pre-existing captions and add
+        duplicate statements.
+
 ## SDC in-data format
 
 ### Main structure
 
 The in-data is expected as a json-like dictionary entry where the main keys are
-`edit_summary`, `caption` and the *Pid*s of any claims that are added.
+`edit_summary`, `caption` and the *Pid*s of any claims that are added. All keys are optional.
 
 Short example:
 ```json
@@ -127,13 +148,15 @@ Examples:
 *   String: `"Some text"`
 *   Url: `"https://commons.wikimedia.org"`
 *   Math: `"E = m c^2"`
-*   Musical notation: `"\drums {cb hh hh hc sn sn hh hh cb}"`
 *   External identifier: `"123-345"`
+*   Musical notation: `"\drums {cb hh hh hc sn sn hh hh cb}"`
 
 Additionally [items](#items), [Commons media](#commons-media), unitless [quantities](#quantity),
-[tabular data](#tabular-data-geo-shapes) and [geo shapes](#tabular-data-geo-shapes)
+[tabular data](#tabular-data-and-geo-shapes) and [geo shapes](#tabular-data-and-geo-shapes)
 can be supplied as simple strings here. The assumptions made for this convenience
 are described in the relevant sections below.
+
+Note that *Musical notation* requires `pywikibot >= 5.5.0` and thus `python >= 3.5`.
 
 #### Items
 
@@ -153,7 +176,7 @@ Wikimedia Commons, independently on which wiki your are writing structured data 
 
 Example values: `"File:Exempel_WIKI.jpg"` or `"Exempel_WIKI.jpg"`.
 
-#### Tabular data / Geo shapes
+#### Tabular data and Geo shapes
 
 For these two data types the page name is supplied as a simple string. The "Data:"
 namespace prefix of the page name must be included. The site on which the pages must
