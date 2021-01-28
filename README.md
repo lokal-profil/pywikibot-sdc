@@ -89,7 +89,7 @@ The *simple claim format* can be used for any data type which can be provided as
 a simple string and where the claim has no qualifiers or a *prominent* flag
 (see *complex claim format* below).
 
-`"Pid": "<string_value>`
+`"Pid": "<string_value>"`
 
 The *complex claim format* can be used for any data type and additionally supports
 qualifiers and and marking the claim as *prominent*.
