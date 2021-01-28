@@ -1,8 +1,8 @@
-Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.svg?branch=master)](https://travis-ci.org/lokal-profil/pywikibot-sdc)
+Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.svg?branch=master)](https://travis-ci.org/lokal-profil/pywikibot-sdc)[![codecov](https://codecov.io/gh/lokal-profil/pywikibot-sdc/branch/master/graph/badge.svg)](https://codecov.io/gh/lokal-profil/pywikibot-sdc)
 =======
 
 Support functionality to allow upload of Structured Data to [Wikimedia Commons](https://commons.wikimedia.org)
-by making use of Pywikibot internals.
+by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot) internals.
 
 This is primarily intended as a stop-gap measure until proper support is
 implemented in Pywikibot [T223820](https://phabricator.wikimedia.org/T223820).
@@ -16,8 +16,8 @@ Heavily inspired by the following hack by Abbe98:
 You can install `pywikibot-sdc` via `pip` using:
 `pip install git+https://github.com/lokal-profil/pywikibot-sdc.git`
 
-If it is your first time running pywikibot you will also have to set up a
-`user-config.py` file.
+If it is your first time running pywikibot you will also have to [set up a
+`user-config.py` file](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Configure_Pywikibot).
 
 ## To use
 
@@ -71,7 +71,7 @@ number of statements added. This field is overridden if an edit_summary is passe
 directly to `upload_single_sdc_data()`. If no edit summary is provided the
 default one below is used:
 
-`'Added {count} structured data statement(s) to recent upload'`
+`'Added {count} structured data statement(s) #pwbsdc'`
 
 #### caption
 
@@ -89,7 +89,9 @@ The *simple claim format* can be used for any data type which can be provided as
 a simple string and where the claim has no qualifiers or a *prominent* flag
 (see *complex claim format* below).
 
-`"Pid": "<string_value>"`
+```python
+"Pid": "<string_value>"
+```
 
 The *complex claim format* can be used for any data type and additionally supports
 qualifiers and and marking the claim as *prominent*.
