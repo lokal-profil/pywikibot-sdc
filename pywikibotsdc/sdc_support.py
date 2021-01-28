@@ -381,7 +381,7 @@ def iso_to_wbtime(date):
             month=m)
 
     # once here all interpretations have failed
-    raise pywikibot.Error(
+    raise ValueError(
         'An invalid ISO-date string received: {}'.format(date))
 
 

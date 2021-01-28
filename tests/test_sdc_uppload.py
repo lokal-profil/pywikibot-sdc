@@ -44,11 +44,11 @@ class TestIsoToWbtime(unittest.TestCase):
     """Test the iso_to_wbtime method."""
 
     def test_iso_to_wbtime_empty_raises(self):
-        with self.assertRaises(pywikibot.Error):
+        with self.assertRaises(ValueError):
             iso_to_wbtime('')
 
     def test_iso_to_wbtime_invalid_date_raises(self):
-        with self.assertRaises(pywikibot.Error):
+        with self.assertRaises(ValueError):
             iso_to_wbtime('late 1980s')
 
     def test_iso_to_wbtime_date_and_time(self):
