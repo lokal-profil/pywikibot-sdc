@@ -27,12 +27,13 @@ from builtins import dict
 import pywikibot
 
 import pywikibotsdc.common as common
+from pywikibotsdc.sdc_exception import SdcException
 
 # Wikibase has hardcoded Commons as the only allowed site for media files
 # T90492. Pywikibot gets cranky if it's initialised straight away though.
 _COMMONS_MEDIA_FILE_SITE = None  # pywikibot.Site('commons', 'commons')
 DEFAULT_EDIT_SUMMARY = \
-    'Added {count} structured data statement(s) to recent upload'
+    'Added {count} structured data statement(s) #pwbsdc'
 
 
 def _get_commons():
@@ -59,8 +60,8 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         data. Allowed values are None (default), "New" and "Blind".
     @param summary: edit summary If not provided one is looked for in the
         sdc_data, if none is found there then a default summary is used.
-    @return: dict of potential issues
-    @raises: ValueError
+    @return: Number of added statements
+    @raises: ValueError, SdcException
     """
     if isinstance(file_page, pywikibot.FilePage):
         if target_site and target_site != file_page.site:
@@ -75,21 +76,21 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     media_identifier = 'M{}'.format(file_page.pageid)
 
     # check if there is Structured data already and resolve what to do
-    objections = merge_strategy(
-        media_identifier, target_site, sdc_data, strategy)
-    if objections:
-        return objections
+    try:
+        merge_strategy(
+            media_identifier, target_site, sdc_data, strategy)
+    except SdcException:
+        pywikibot.output('Oh no something')  #Keep?
+        raise
 
     # Translate from internal sdc data format to that expected by MediaWiki.
     try:
         sdc_payload = format_sdc_payload(target_site, sdc_data)
     except Exception as error:
-        return {
-            'type': 'error',
-            'data': error,
-            'log': '{0} Error formatting SDC data: {1}'.format(
+        raise SdcException(
+            'error', error, '{0} - Formatting SDC data failed: {1}'.format(
                 file_page.title(), error)
-        }
+        )
 
     # upload sdc data
     summary = summary or sdc_data.get('edit_summary', DEFAULT_EDIT_SUMMARY)
@@ -109,12 +110,11 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     try:
         request.submit()
     except pywikibot.data.api.APIError as error:
-        return {
-            'type': 'error',
-            'data': error,
-            'log': '{0} Error uploading SDC data: {1}'.format(
+        raise SdcException(
+            'error', error, '{0} - Uploading SDC data failed: {1}'.format(
                 file_page.title(), error)
-        }
+        )
+    return num_statements
 
 
 def merge_strategy(media_identifier, target_site, sdc_data, strategy):
@@ -126,9 +126,7 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     @param sdc_data: internally formatted Structured data in json format
     @param strategy: Strategy used for merging uploaded data with pre-existing
         data. Allowed values are None, "New" and "Blind".
-    @return: None if no objections to uploading the data else a dict specifying
-        the issues preventing upload.
-    @raises: ValueError
+    @raises: ValueError, SdcException
     """
     # @todo: Consider two more strategies: nuke (delete all pre-existing data),
     #        squeeze (drop conflicting, but upload non-conflicting, properties)
@@ -137,26 +135,24 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     raw = request.submit()
     if raw.get('entities').get(media_identifier).get('pageid'):
         if not strategy:
-            return {
-                'type': 'warning',
-                'data': 'pre-existing sdc-data',
-                'log': 'Warning: Found pre-existing SDC data, no new '
-                       'data will be added. Found data: {}'.format(
-                        raw.get('entities').get(media_identifier))
-            }
+            raise SdcException(
+                'warning', 'pre-existing sdc-data',
+                ('Found pre-existing SDC data, no new data will be added. '
+                 'Found data: {}'.format(
+                     raw.get('entities').get(media_identifier)))
+            )
         elif strategy.lower() == 'new':
             pre_pids = raw['entities'][media_identifier]['statements'].keys()
             pre_langs = raw['entities'][media_identifier]['labels'].keys()
             new_langs = sdc_data.get('caption', {}).keys()
             if (not set(pre_pids).isdisjoint(sdc_data.keys())
                     or not set(pre_langs).isdisjoint(new_langs)):
-                return {
-                    'type': 'warning',
-                    'data': 'conflicting pre-existing sdc-data',
-                    'log': 'Warning: Found pre-existing SDC data, no new '
-                           'data will be added. Found data: {}'.format(
-                            raw.get('entities').get(media_identifier))
-                }
+                raise SdcException(
+                    'warning', 'conflicting pre-existing sdc-data',
+                    ('Found pre-existing SDC data, no new data will be added. '
+                     'Found data: {}'.format(
+                         raw.get('entities').get(media_identifier)))
+                )
         elif not strategy.lower() == 'blind':
             raise ValueError(
                 'The `strategy` parameter must be None, "New" or "Blind" '

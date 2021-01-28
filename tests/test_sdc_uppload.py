@@ -9,6 +9,7 @@ import mock
 
 import pywikibot
 
+from pywikibotsdc.sdc_exception import SdcException
 from pywikibotsdc.sdc_support import (
     coord_precision,
     is_prop_key,
@@ -198,53 +199,57 @@ class TestMergeStrategy(unittest.TestCase):
         self.assertTrue('foo' in str(ve.exception))
 
     def test_merge_strategy_none_strategy_no_data(self):
-        result = merge_strategy(self.mid, self.mock_site, self.base_sdc, None)
-        self.assertIsNone(result)
+        input_data = self.base_sdc.copy()
+        merge_strategy(self.mid, self.mock_site, self.base_sdc, None)
+        self.assertEquals(input_data, self.base_sdc)
 
     def test_merge_strategy_none_strategy_some_non_conflicting_data(self):
         self.set_mock_response_data(captions={'fr': 'hello'})
-        result = merge_strategy(self.mid, self.mock_site, self.base_sdc, None)
-        self.assertIsNotNone(result)
+        with self.assertRaises(SdcException) as se:
+            merge_strategy(self.mid, self.mock_site, self.base_sdc, None)
+        self.assertEquals(se.exception.data, 'pre-existing sdc-data')
 
     def test_merge_strategy_new_strategy_no_data(self):
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'New')
-        self.assertIsNone(result)
+        input_data = self.base_sdc.copy()
+        merge_strategy(self.mid, self.mock_site, self.base_sdc, 'New')
+        self.assertEquals(input_data, self.base_sdc)
 
     def test_merge_strategy_new_strategy_some_non_conflicting_data(self):
+        input_data = self.base_sdc.copy()
         self.set_mock_response_data(
             captions={'fr': 'hello'}, claims={'P456': [{}]})
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'New')
-        self.assertIsNone(result)
+        merge_strategy(self.mid, self.mock_site, self.base_sdc, 'New')
+        self.assertEquals(input_data, self.base_sdc)
 
     def test_merge_strategy_new_strategy_some_conflicting_label_data(self):
         self.set_mock_response_data(captions={'sv': 'hello'})
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'New')
-        self.assertIsNotNone(result)
+        with self.assertRaises(SdcException) as se:
+            merge_strategy(self.mid, self.mock_site, self.base_sdc, 'New')
+        self.assertEquals(
+            se.exception.data, 'conflicting pre-existing sdc-data')
 
     def test_merge_strategy_new_strategy_some_conflicting_claim_data(self):
         self.set_mock_response_data(claims={'P123': [{}]})
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'New')
-        self.assertIsNotNone(result)
+        with self.assertRaises(SdcException) as se:
+            merge_strategy(self.mid, self.mock_site, self.base_sdc, 'New')
+        self.assertEquals(
+            se.exception.data, 'conflicting pre-existing sdc-data')
 
     def test_merge_strategy_blind_strategy_no_data(self):
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'Blind')
-        self.assertIsNone(result)
+        input_data = self.base_sdc.copy()
+        merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Blind')
+        self.assertEquals(input_data, self.base_sdc)
 
     def test_merge_strategy_blind_strategy_some_non_conflicting_data(self):
+        input_data = self.base_sdc.copy()
         self.set_mock_response_data(
             captions={'fr': 'hello'}, claims={'P456': [{}]})
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'Blind')
-        self.assertIsNone(result)
+        merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Blind')
+        self.assertEquals(input_data, self.base_sdc)
 
     def test_merge_strategy_blind_strategy_some_conflicting_data(self):
+        input_data = self.base_sdc.copy()
         self.set_mock_response_data(
             captions={'sv': 'hello'}, claims={'P123': [{}]})
-        result = merge_strategy(
-            self.mid, self.mock_site, self.base_sdc, 'Blind')
-        self.assertIsNone(result)
+        merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Blind')
+        self.assertEquals(input_data, self.base_sdc)
