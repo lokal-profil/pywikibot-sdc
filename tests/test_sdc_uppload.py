@@ -85,6 +85,21 @@ class TestIsoToWbtime(unittest.TestCase):
         expected = pywikibot.WbTime(year=2014, month=7)
         self.assertEqual(iso_to_wbtime(date), expected)
 
+    def test_iso_to_wbtime_year_month_zero_day(self):
+        date = '2014-07-00'
+        expected = pywikibot.WbTime(year=2014, month=7)
+        self.assertEqual(iso_to_wbtime(date), expected)
+
+    def test_iso_to_wbtime_year_zero_month_zero_day(self):
+        date = '2014-00-00'
+        expected = pywikibot.WbTime(year=2014)
+        self.assertEqual(iso_to_wbtime(date), expected)
+
+    def test_iso_to_wbtime_year_zero_month(self):
+        date = '2014-00'
+        expected = pywikibot.WbTime(year=2014)
+        self.assertEqual(iso_to_wbtime(date), expected)
+
 
 class TestCoordPrecision(unittest.TestCase):
     """Test the coord_precision method."""
