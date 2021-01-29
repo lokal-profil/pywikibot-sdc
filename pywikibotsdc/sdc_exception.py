@@ -31,4 +31,4 @@ class SdcException(Error):
         self.level = level
         self.data = data
         self.log = "{0}: {1}".format(level.upper(), log)
-        super().__init__(self.log)
+        super(SdcException, self).__init__(self.log)
