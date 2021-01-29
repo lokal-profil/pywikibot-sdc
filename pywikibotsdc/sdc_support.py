@@ -76,12 +76,8 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     media_identifier = 'M{}'.format(file_page.pageid)
 
     # check if there is Structured data already and resolve what to do
-    try:
-        merge_strategy(
-            media_identifier, target_site, sdc_data, strategy)
-    except SdcException:
-        pywikibot.output('Oh no something')  #Keep?
-        raise
+    # raise SdcException if merge is not possible
+    merge_strategy(media_identifier, target_site, sdc_data, strategy)
 
     # Translate from internal sdc data format to that expected by MediaWiki.
     try:
