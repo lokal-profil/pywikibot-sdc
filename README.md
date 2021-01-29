@@ -1,4 +1,4 @@
-Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.svg?branch=master)](https://travis-ci.org/lokal-profil/pywikibot-sdc)[![codecov](https://codecov.io/gh/lokal-profil/pywikibot-sdc/branch/master/graph/badge.svg)](https://codecov.io/gh/lokal-profil/pywikibot-sdc)
+Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.svg?branch=master)](https://travis-ci.org/lokal-profil/pywikibot-sdc)[![codecov.io Code Coverage](https://img.shields.io/codecov/c/github/lokal-profil/pywikibot-sdc.svg)](https://codecov.io/gh/lokal-profil/pywikibot-sdc)
 =======
 
 Support functionality to allow upload of Structured Data to [Wikimedia Commons](https://commons.wikimedia.org)
