@@ -113,6 +113,27 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     return num_statements
 
 
+def _get_existing_structured_data(media_identifier, target_site):
+    """
+    Return pre-existing Structured data, if any.
+
+    This treats an file where no Structured data has ever existed the same as
+    one where all statements and captions have been removed.
+
+    @param media_identifier: Mid of the file
+    @param target_site: pywikibot.Site object to which file should be uploaded
+    @return The Structured data of the file or None if no data was ever present
+        or if the data has since been removed.
+    """
+    request = target_site._simple_request(
+        action='wbgetentities', ids=media_identifier)
+    raw = request.submit()
+    data = raw.get('entities').get(media_identifier)
+    if ('missing' not in data.keys()
+            and (data.get('labels') or data.get('statements'))):
+        return data
+
+
 def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     """
     Check if the file already holds Structured data, if so resolve what to do.
@@ -126,28 +147,24 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     """
     # @todo: Consider two more strategies: nuke (delete all pre-existing data),
     #        squeeze (drop conflicting, but upload non-conflicting, properties)
-    request = target_site._simple_request(
-        action='wbgetentities', ids=media_identifier)
-    raw = request.submit()
-    if raw.get('entities').get(media_identifier).get('pageid'):
+    prior_data = _get_existing_structured_data(media_identifier, target_site)
+    if prior_data:
         if not strategy:
             raise SdcException(
                 'warning', 'pre-existing sdc-data',
                 ('Found pre-existing SDC data, no new data will be added. '
-                 'Found data: {}'.format(
-                     raw.get('entities').get(media_identifier)))
+                 'Found data: {}'.format(prior_data))
             )
         elif strategy.lower() == 'new':
-            pre_pids = raw['entities'][media_identifier]['statements'].keys()
-            pre_langs = raw['entities'][media_identifier]['labels'].keys()
+            pre_pids = prior_data['statements'].keys()
+            pre_langs = prior_data['labels'].keys()
             new_langs = sdc_data.get('caption', {}).keys()
             if (not set(pre_pids).isdisjoint(sdc_data.keys())
                     or not set(pre_langs).isdisjoint(new_langs)):
                 raise SdcException(
                     'warning', 'conflicting pre-existing sdc-data',
                     ('Found pre-existing SDC data, no new data will be added. '
-                     'Found data: {}'.format(
-                         raw.get('entities').get(media_identifier)))
+                     'Found data: {}'.format(prior_data))
                 )
         elif not strategy.lower() == 'blind':
             raise ValueError(
