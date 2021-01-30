@@ -50,10 +50,10 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     Upload the Structured Data corresponding to the recently uploaded file.
 
     @param file_page: pywikibot.FilePage object (or the file name as a string)
-        corresponding to the media file to which Structured data should be
+        corresponding to the media file to which Structured Data should be
         attached. If a file name is provided the target_site parameter must
         also be supplied unless the file lives on Wikimedia Commons).
-    @param sdc_data: internally formatted Structured data in json format
+    @param sdc_data: internally formatted Structured Data in json format
     @param target_site: pywikibot.Site where the file_page is found (if only a
         file name was supplied). Defaults to Wikimedia Commons.
     @param strategy: Strategy used for merging uploaded data with pre-existing
@@ -75,7 +75,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
 
     media_identifier = 'M{}'.format(file_page.pageid)
 
-    # check if there is Structured data already and resolve what to do
+    # check if there is Structured Data already and resolve what to do
     # raise SdcException if merge is not possible
     merge_strategy(media_identifier, target_site, sdc_data, strategy)
 
@@ -115,14 +115,14 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
 
 def _get_existing_structured_data(media_identifier, target_site):
     """
-    Return pre-existing Structured data, if any.
+    Return pre-existing Structured Data, if any.
 
-    This treats an file where no Structured data has ever existed the same as
+    This treats an file where no Structured Data has ever existed the same as
     one where all statements and captions have been removed.
 
     @param media_identifier: Mid of the file
     @param target_site: pywikibot.Site object to which file should be uploaded
-    @return The Structured data of the file or None if no data was ever present
+    @return The Structured Data of the file or None if no data was ever present
         or if the data has since been removed.
     """
     request = target_site._simple_request(
@@ -136,11 +136,11 @@ def _get_existing_structured_data(media_identifier, target_site):
 
 def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     """
-    Check if the file already holds Structured data, if so resolve what to do.
+    Check if the file already holds Structured Data, if so resolve what to do.
 
     @param media_identifier: Mid of the file
     @param target_site: pywikibot.Site object to which file should be uploaded
-    @param sdc_data: internally formatted Structured data in json format
+    @param sdc_data: internally formatted Structured Data in json format
     @param strategy: Strategy used for merging uploaded data with pre-existing
         data. Allowed values are None, "New" and "Blind".
     @raises: ValueError, SdcException
@@ -211,7 +211,7 @@ def make_claim(value, prop, target_site):
 
     @param value: str|dict The internally formatted claim value
     @param prop: str Property of the claim
-    @param target_site: pywikibot.Site to which Structured data is uploaded
+    @param target_site: pywikibot.Site to which Structured Data is uploaded
     @return: pywikibot.Claim
     @raises: ValueError
     """
