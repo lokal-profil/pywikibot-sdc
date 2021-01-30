@@ -34,6 +34,7 @@ from pywikibotsdc.sdc_exception import SdcException
 _COMMONS_MEDIA_FILE_SITE = None  # pywikibot.Site('commons', 'commons')
 DEFAULT_EDIT_SUMMARY = \
     'Added {count} structured data statement(s) #pwbsdc'
+STRATEGIES = ('new', 'blind')
 
 
 def _get_commons():
@@ -166,10 +167,14 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
                     ('Found pre-existing SDC data, no new data will be added. '
                      'Found data: {}'.format(prior_data))
                 )
-        elif not strategy.lower() == 'blind':
+        elif strategy.lower() not in STRATEGIES:
             raise ValueError(
-                'The `strategy` parameter must be None, "New" or "Blind" '
-                'but "{}" was provided'.format(strategy))
+                'The `strategy` parameter must be None, "{0}" or "{1}" '
+                'but "{2}" was provided'.format(
+                    '", "'.join([s.capitalize() for s in STRATEGIES[:-1]]),
+                    STRATEGIES[-1].capitalize(),
+                    strategy))
+        # pass if strategy is "Blind"
 
 
 def format_sdc_payload(target_site, data):
