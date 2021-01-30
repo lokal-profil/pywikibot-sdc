@@ -11,6 +11,7 @@ import pywikibot
 
 from pywikibotsdc.sdc_exception import SdcException
 from pywikibotsdc.sdc_support import (
+    _get_existing_structured_data,
     coord_precision,
     is_prop_key,
     iso_to_wbtime,
@@ -151,11 +152,110 @@ class TestCoordPrecision(unittest.TestCase):
         self.assertEqual(coord_precision('12.34456'), 0.00001)
 
 
+class TestGetExistingStructuredData(unittest.TestCase):
+    """
+    Test the _get_existing_structured_data method.
+
+    Testing focuses on determining if any data is present based on a handful of
+    real responses.
+    """
+
+    def setUp(self):
+        self.mid = 'M102303'
+        self.mock_site = mock.MagicMock()
+
+    def set_mock_response_data(self, sdc):
+        """Set the mock response of the API call."""
+        data = {
+            'entities': {
+                self.mid: sdc
+            },
+            'success': 1
+        }
+        self.mock_site._simple_request.return_value.submit.return_value = data
+
+    def test_get_existing_structured_data_never_existed_none(self):
+        data = {'id': 'M102303', 'missing': ''}
+        self.set_mock_response_data(data)
+        result = _get_existing_structured_data(self.mid, self.mock_site)
+        self.assertIsNone(result)
+
+    def test_get_existing_structured_data_data_deleted_none(self):
+        data = {
+            'pageid': 102303, 'ns': 6,
+            'title': 'File:John Hamilton-Buchanan, Vanity Fair, 1910-09-07.jpg',  # noqa
+            'lastrevid': 229666, 'modified': '2021-01-30T21:48:18Z',
+            'type': 'mediainfo', 'id': 'M102303', 'labels': {},
+            'descriptions': {}, 'statements': []}
+        self.set_mock_response_data(data)
+        result = _get_existing_structured_data(self.mid, self.mock_site)
+        self.assertIsNone(result)
+
+    def test_get_existing_structured_data_has_caption(self):
+        data = {
+            'pageid': 102303, 'ns': 6,
+            'title': 'File:John Hamilton-Buchanan, Vanity Fair, 1910-09-07.jpg',  # noqa
+            'lastrevid': 229665, 'modified': '2021-01-30T21:47:25Z',
+            'type': 'mediainfo', 'id': 'M102303',
+            'labels': {'en': {'language': 'en', 'value': 'hello'}},
+            'descriptions': {}, 'statements': []}
+        self.set_mock_response_data(data)
+        result = _get_existing_structured_data(self.mid, self.mock_site)
+        self.assertEquals(result, data)
+
+    def test_get_existing_structured_data_has_statement(self):
+        data = {
+            'pageid': 102303, 'ns': 6,
+            'title': 'File:John Hamilton-Buchanan, Vanity Fair, 1910-09-07.jpg',  # noqa
+            'lastrevid': 229664, 'modified': '2021-01-30T21:46:37Z',
+            'type': 'mediainfo', 'id': 'M102303', 'labels': {},
+            'descriptions': {},
+            'statements': {'P245962': [{'mainsnak': {
+                'snaktype': 'value', 'property': 'P245962',
+                'hash': 'e5b20128816e43e6720cf8cd9e7a7eaa7bb67b98',
+                'datavalue': {
+                    'value': {
+                        'entity-type': 'item', 'numeric-id': 123,
+                        'id': 'Q123'},
+                    'type': 'wikibase-entityid'}},
+                'type': 'statement',
+                'id': 'M102303$0c401e5f-48b3-c80d-b9d6-569fa34b9f51',
+                'rank': 'normal'}]}}
+        self.set_mock_response_data(data)
+        result = _get_existing_structured_data(self.mid, self.mock_site)
+        self.assertEquals(result, data)
+
+    def test_get_existing_structured_data_has_caption_and_statement(self):
+        data = {
+            'pageid': 102303, 'ns': 6,
+            'title': 'File:John Hamilton-Buchanan, Vanity Fair, 1910-09-07.jpg',  # noqa
+            'lastrevid': 229664, 'modified': '2021-01-30T21:46:37Z',
+            'type': 'mediainfo', 'id': 'M102303',
+            'labels': {'en': {'language': 'en', 'value': 'hello'}},
+            'descriptions': {},
+            'statements': {'P245962': [{'mainsnak': {
+                'snaktype': 'value', 'property': 'P245962',
+                'hash': 'e5b20128816e43e6720cf8cd9e7a7eaa7bb67b98',
+                'datavalue': {
+                    'value': {
+                        'entity-type': 'item', 'numeric-id': 123,
+                        'id': 'Q123'},
+                    'type': 'wikibase-entityid'}},
+                'type': 'statement',
+                'id': 'M102303$0c401e5f-48b3-c80d-b9d6-569fa34b9f51',
+                'rank': 'normal'}]}}
+        self.set_mock_response_data(data)
+        result = _get_existing_structured_data(self.mid, self.mock_site)
+        self.assertEquals(result, data)
+
+
 class TestMergeStrategy(unittest.TestCase):
     """Test the merge_strategy method."""
 
     def setUp(self):
         self.mid = 'M123'
+        self.mock_site = mock.MagicMock()
+
         self.base_sdc = {
             "caption": {
                 "en": "Foo",
@@ -163,28 +263,20 @@ class TestMergeStrategy(unittest.TestCase):
             },
             "P123": "Q456",
         }
-        self.empty_response = {
-            'entities': {
-                self.mid: {}
-            }
-        }
 
-        self.mock_site = mock.MagicMock()
-        self.mock_site._simple_request.return_value.submit.return_value = \
-            self.empty_response
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support._get_existing_structured_data')
+        self.mock__get_existing_structured_data = patcher.start()
+        self.mock__get_existing_structured_data.return_value = None
+        self.addCleanup(patcher.stop)
 
     def set_mock_response_data(self, captions=None, claims=None):
         """Set the mock response of the API call."""
         data = {
-            'entities': {
-                self.mid: {
-                    'pageid': '123',
-                    'labels': captions or {},
-                    'statements': claims or {}
-                }
-            }
+            'labels': captions or {},
+            'statements': claims or {}
         }
-        self.mock_site._simple_request.return_value.submit.return_value = data
+        self.mock__get_existing_structured_data.return_value = data
 
     def test_merge_strategy_unknown_strategy_no_data(self):
         result = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'foo')
