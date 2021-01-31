@@ -20,7 +20,7 @@ from pywikibotsdc.sdc_exception import SdcException
 _COMMONS_MEDIA_FILE_SITE = None  # pywikibot.Site('commons', 'commons')
 DEFAULT_EDIT_SUMMARY = \
     'Added {count} structured data statement(s) #pwbsdc'
-STRATEGIES = ('new', 'blind')
+STRATEGIES = ('new', 'blind', 'squeeze')
 
 
 def _get_commons():
@@ -129,11 +129,12 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     @param target_site: pywikibot.Site object to which file should be uploaded
     @param sdc_data: internally formatted Structured Data in json format
     @param strategy: Strategy used for merging uploaded data with pre-existing
-        data. Allowed values are None, "New" and "Blind".
+        data. Allowed values are None, "New", "Blind" and "Squeeze".
+    @return: dict of pids and caption languages removed from sdc_data due to
+        conflicts.
     @raises: ValueError, SdcException
     """
-    # @todo: Consider two more strategies: nuke (delete all pre-existing data),
-    #        squeeze (drop conflicting, but upload non-conflicting, properties)
+    # @todo: Consider one more strategy: nuke (delete all pre-existing data)
     prior_data = _get_existing_structured_data(media_identifier, target_site)
     if prior_data:
         if not strategy:
@@ -142,11 +143,30 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
                 ('Found pre-existing SDC data, no new data will be added. '
                  'Found data: {}'.format(prior_data))
             )
-        elif strategy.lower() == 'new':
+        elif strategy.lower() in ('new', 'squeeze'):
             pre_pids = prior_data['statements'].keys()
             pre_langs = prior_data['labels'].keys()
             new_langs = sdc_data.get('caption', {}).keys()
-            if (not set(pre_pids).isdisjoint(sdc_data.keys())
+
+            if strategy.lower() == 'squeeze':
+                pid_clash = set(pre_pids).intersection(sdc_data.keys())
+                lang_clash = set(pre_langs).intersection(new_langs)
+                for pid in pid_clash:
+                    sdc_data.pop(pid, None)
+                for lang in lang_clash:
+                    sdc_data['caption'].pop(lang, None)
+                if (not any(is_prop_key(key) for key in sdc_data.keys())
+                        and not sdc_data.get('caption')):
+                    # warn if not data left to upload
+                    raise SdcException(
+                        'warning', 'all conflicting pre-existing sdc-data',
+                        ('Found pre-existing SDC data, no new non-conflicting '
+                         'data could be added. Found data: {}'.format(
+                             prior_data))
+                    )
+                elif pid_clash or lang_clash:
+                    return {'pids': pid_clash, 'langs': lang_clash}
+            elif (not set(pre_pids).isdisjoint(sdc_data.keys())
                     or not set(pre_langs).isdisjoint(new_langs)):
                 raise SdcException(
                     'warning', 'conflicting pre-existing sdc-data',
