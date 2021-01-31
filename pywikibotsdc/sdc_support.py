@@ -3,21 +3,7 @@
 """
 Support functionality to allow upload of Structured Data.
 
-Internally used format described in docs/SDC_README.md
-
-There are three allowed strategies for merging the provided data with any
-pre-existing data.
-* None (default): Only upload the data if no prior data exists
-* New: Only upload the data if there is no prior data for that claim. I.e.
-  no prior statements for a particular Pid or no caption for a particular
-  language.
-* Blind (not generally recommended): Upload the data without regards to
-  what is already there. May overwrite pre-existing captions and add
-  duplicate statements.
-
-Stopgap until proper support is implemented in Pywikibot T223820.
-Heavily inspired by hack by Abbe98:
-https://byabbe.se/2020/09/15/writing-structured-data-on-commons-with-python
+Internally used data format and merge strategies described in README.md.
 """
 from __future__ import unicode_literals
 
