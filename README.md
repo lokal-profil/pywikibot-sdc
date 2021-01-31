@@ -32,10 +32,10 @@ To upload data to a file that already contains some structured data add the
 ### Merge strategies
 There are three allowed strategies for merging the provided data with any
 pre-existing data.
-*   `None` (default): Only upload the data if no prior data exists
-*   `"New"`: Only upload the data if there is no prior data for that claim. I.e.
-        no prior statements for a particular Pid or no caption for a particular
-        language.
+*   `None` (default): Only upload the data if no prior data exists.
+*   `"New"`: Only upload the data if there is no prior data for any of the
+        claims to be added. I.e. drop all data if any of the proposed Pids or
+        caption languages are already present.
 *   `"Blind"` (not generally recommended): Upload the data without regards to
         what is already there. May overwrite pre-existing captions and add
         duplicate statements.
