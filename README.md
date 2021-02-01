@@ -30,7 +30,7 @@ To upload data to a file that already contains some structured data add the
 `strategy` argument to the call using one of the [named merge strategies](#merge-strategies).
 
 ### Merge strategies
-There are three allowed strategies for merging the provided data with any
+There are four allowed strategies for merging the provided data with any
 pre-existing data.
 *   `None` (default): Only upload the data if no prior data exists.
 *   `"New"`: Only upload the data if there is no prior data for any of the

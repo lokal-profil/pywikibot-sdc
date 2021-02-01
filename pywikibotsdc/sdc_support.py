@@ -64,7 +64,13 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
 
     # check if there is Structured Data already and resolve what to do
     # raise SdcException if merge is not possible
-    merge_strategy(media_identifier, target_site, sdc_data, strategy)
+    skipped = merge_strategy(media_identifier, target_site, sdc_data, strategy)
+    if skipped:
+        pywikibot.log(
+            '{0} - Conflict with existing values. Dropping the following '
+            'properties and caption languages{}.'.format(
+                file_page.title(),
+                ', '.join([', '.join(v) for v in skipped.values()])))
 
     # Translate from internal sdc data format to that expected by MediaWiki.
     try:
