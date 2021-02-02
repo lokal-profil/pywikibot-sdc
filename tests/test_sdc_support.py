@@ -280,7 +280,7 @@ class TestMergeStrategy(unittest.TestCase):
         self.mock__get_existing_structured_data.return_value = data
 
     def test_merge_strategy_any_strategy_no_data(self):
-        """Any strategy, even an unknown one, should pass if no prior data."""
+        # Any strategy, even an unknown one, should pass if no prior data.
         for strategy in (None, 'new', 'blind', 'squeeze', 'foo'):
             input_data = deepcopy(self.base_sdc)
             r = merge_strategy(
@@ -306,7 +306,7 @@ class TestMergeStrategy(unittest.TestCase):
         input_data = deepcopy(self.base_sdc)
         self.set_mock_response_data(
             captions={'fr': 'hello'}, claims={'P456': [{}]})
-        r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'New')
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'New')
         self.assertEquals(input_data, self.base_sdc)
         self.assertIsNone(r)
 
@@ -328,7 +328,7 @@ class TestMergeStrategy(unittest.TestCase):
         input_data = deepcopy(self.base_sdc)
         self.set_mock_response_data(
             captions={'fr': 'hello'}, claims={'P456': [{}]})
-        r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Blind')
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'Blind')
         self.assertEquals(input_data, self.base_sdc)
         self.assertIsNone(r)
 
@@ -336,7 +336,7 @@ class TestMergeStrategy(unittest.TestCase):
         input_data = deepcopy(self.base_sdc)
         self.set_mock_response_data(
             captions={'sv': 'hello'}, claims={'P123': [{}]})
-        r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Blind')
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'Blind')
         self.assertEquals(input_data, self.base_sdc)
         self.assertIsNone(r)
 
@@ -344,7 +344,7 @@ class TestMergeStrategy(unittest.TestCase):
         input_data = deepcopy(self.base_sdc)
         self.set_mock_response_data(
             captions={'fr': 'hello'}, claims={'P456': [{}]})
-        r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Squeeze')
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'Squeeze')
         self.assertEquals(input_data, self.base_sdc)
         self.assertIsNone(r)
 
@@ -355,7 +355,7 @@ class TestMergeStrategy(unittest.TestCase):
         self.set_mock_response_data(
             captions={'sv': 'hello', 'fr': 'hi'}, claims={'P123': [{}]})
         r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Squeeze')
-        self.assertEquals(expected_data, self.base_sdc)
+        self.assertEquals(self.base_sdc, expected_data)
         self.assertEquals(r, {'pids': {'P123'}, 'langs': {'sv'}})
 
     def test_merge_strategy_squeeze_strategy_all_conflicting_data(self):
