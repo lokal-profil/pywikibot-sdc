@@ -281,7 +281,7 @@ class TestMergeStrategy(unittest.TestCase):
 
     def test_merge_strategy_any_strategy_no_data(self):
         # Any strategy, even an unknown one, should pass if no prior data.
-        for strategy in (None, 'new', 'blind', 'squeeze', 'foo'):
+        for strategy in (None, 'new', 'blind', 'squeeze', 'nuke', 'foo'):
             input_data = deepcopy(self.base_sdc)
             r = merge_strategy(
                 self.mid, self.mock_site, input_data, strategy)
@@ -365,3 +365,19 @@ class TestMergeStrategy(unittest.TestCase):
             merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Squeeze')
         self.assertEquals(
             se.exception.data, 'all conflicting pre-existing sdc-data')
+
+    def test_merge_strategy_nuke_strategy_some_non_conflicting_data(self):
+        input_data = deepcopy(self.base_sdc)
+        self.set_mock_response_data(
+            captions={'fr': 'hello'}, claims={'P456': [{}]})
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'Nuke')
+        self.assertEquals(input_data, self.base_sdc)
+        self.assertIsNone(r)
+
+    def test_merge_strategy_nuke_strategy_some_conflicting_data(self):
+        input_data = deepcopy(self.base_sdc)
+        self.set_mock_response_data(
+            captions={'sv': 'hello'}, claims={'P123': [{}]})
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'Nuke')
+        self.assertEquals(input_data, self.base_sdc)
+        self.assertIsNone(r)
