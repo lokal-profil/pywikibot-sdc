@@ -16,7 +16,8 @@ from pywikibotsdc.sdc_support import (
     coord_precision,
     is_prop_key,
     iso_to_wbtime,
-    merge_strategy
+    merge_strategy,
+    upload_single_sdc_data
 )
 
 
@@ -381,3 +382,55 @@ class TestMergeStrategy(unittest.TestCase):
         r = merge_strategy(self.mid, self.mock_site, input_data, 'Nuke')
         self.assertEquals(input_data, self.base_sdc)
         self.assertIsNone(r)
+
+
+class TestUploadSingleSdcData(unittest.TestCase):
+    """Test the upload_single_sdc_data method."""
+
+    def setUp(self):
+        self.mock_file_page = mock.MagicMock(spec=pywikibot.FilePage)
+
+        self.base_sdc = {
+            "caption": {
+                "en": "Foo",
+                "sv": "Bar",
+            },
+            "P123": "Q456",
+        }
+
+        # mock out anything communicating with live platforms
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support._submit_data')
+        self.mock__submit_data = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support._get_commons')
+        self.mock__get_commons = patcher.start()
+        self.mock__get_commons.return_value = mock.MagicMock(spec=pywikibot.Site)  # noqa:E501
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support.merge_strategy')
+        self.mock_merge_strategy = patcher.start()
+        self.mock_merge_strategy.return_value = None
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support.format_sdc_payload')
+        self.mock_format_sdc_payload = patcher.start()
+        self.mock_format_sdc_payload.return_value = {}
+        self.addCleanup(patcher.stop)
+
+    def test_upload_single_sdc_data_handle_upload_error(self):
+        self.mock__submit_data.side_effect = pywikibot.data.api.APIError('mock error', '')  # noqa:E501
+        with self.assertRaises(SdcException) as se:
+            upload_single_sdc_data(self.mock_file_page, self.base_sdc)
+        self.assertTrue('mock error' in se.exception.log)
+
+    def test_upload_single_sdc_data_nuke_triggers_clear(self):
+        upload_single_sdc_data(
+            self.mock_file_page, self.base_sdc, strategy="Nuke")
+        self.mock__submit_data.called_once()
+        payload = self.mock__submit_data.call_args[0][1]
+        self.assertEquals(payload.get('clear', None), 1)
