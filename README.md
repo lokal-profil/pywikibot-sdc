@@ -30,12 +30,15 @@ To upload data to a file that already contains some structured data add the
 `strategy` argument to the call using one of the [named merge strategies](#merge-strategies).
 
 ### Merge strategies
-There are three allowed strategies for merging the provided data with any
+There are four allowed strategies for merging the provided data with any
 pre-existing data.
 *   `None` (default): Only upload the data if no prior data exists.
 *   `"New"`: Only upload the data if there is no prior data for any of the
         claims to be added. I.e. drop all data if any of the proposed Pids or
         caption languages are already present.
+*   `"Squeeze"`: Only upload those parts of the data for which there are no
+        prior claims. I.e. drop any statements where the Pid or caption language
+        is already present.
 *   `"Blind"` (not generally recommended): Upload the data without regards to
         what is already there. May overwrite pre-existing captions and add
         duplicate statements.
