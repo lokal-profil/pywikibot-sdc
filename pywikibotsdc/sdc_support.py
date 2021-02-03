@@ -31,6 +31,18 @@ def _get_commons():
     return _COMMONS_MEDIA_FILE_SITE
 
 
+def _submit_data(target_site, payload):
+    """
+    Submit the Structured Data for upload.
+
+    @param target_site: pywikibot.Site where data is uploaded.
+    @param payload: request formatted for the MediaWiki Action API
+    @raises: pywikibot.data.api.APIError
+    """
+    request = target_site._simple_request(**payload)
+    request.submit()
+
+
 def upload_single_sdc_data(file_page, sdc_data, target_site=None,
                            strategy=None, summary=None):
     """
@@ -50,6 +62,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     @return: Number of added statements
     @raises: ValueError, SdcException
     """
+    # support either file_name+Site or file_page as input
     if isinstance(file_page, pywikibot.FilePage):
         if target_site and target_site != file_page.site:
             raise ValueError(
@@ -94,12 +107,11 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         'summary': summary.format(count=num_statements),
         'bot': target_site.has_right('bot')
     }
-    if strategy.lower() == 'nuke':
+    if strategy and strategy.lower() == 'nuke':
         payload['clear'] = 1
 
-    request = target_site._simple_request(**payload)
     try:
-        request.submit()
+        _submit_data(target_site, payload)
     except pywikibot.data.api.APIError as error:
         raise SdcException(
             'error', error, '{0} - Uploading SDC data failed: {1}'.format(
