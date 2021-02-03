@@ -286,8 +286,8 @@ class TestMergeStrategy(unittest.TestCase):
             input_data = deepcopy(self.base_sdc)
             r = merge_strategy(
                 self.mid, self.mock_site, input_data, strategy)
-            self.assertIsNone(r)
-            self.assertEquals(input_data, self.base_sdc)
+            self.assertIsNone(r, msg=strategy)
+            self.assertEquals(input_data, self.base_sdc, msg=strategy)
 
     def test_merge_strategy_unknown_strategy_some_data_raises(self):
         self.set_mock_response_data(captions={'sv': 'hello'})
@@ -428,9 +428,19 @@ class TestUploadSingleSdcData(unittest.TestCase):
             upload_single_sdc_data(self.mock_file_page, self.base_sdc)
         self.assertTrue('mock error' in se.exception.log)
 
+    def test_upload_single_sdc_data_any_non_nuke_does_not_trigger_clear(self):
+        strategies = (None, 'new', 'blind', 'squeeze', 'foo')
+        for strategy in strategies:
+            upload_single_sdc_data(
+                self.mock_file_page, self.base_sdc, strategy=strategy)
+        self.assertEqual(self.mock__submit_data.call_count, len(strategies))
+        for num, call in enumerate(self.mock__submit_data.call_args_list):
+            payload = call[0][1]
+            self.assertEquals(payload.get('clear', 0), 0, msg=strategies[num])
+
     def test_upload_single_sdc_data_nuke_triggers_clear(self):
         upload_single_sdc_data(
             self.mock_file_page, self.base_sdc, strategy="Nuke")
         self.mock__submit_data.called_once()
         payload = self.mock__submit_data.call_args[0][1]
-        self.assertEquals(payload.get('clear', None), 1)
+        self.assertEquals(payload.get('clear', 0), 1)
