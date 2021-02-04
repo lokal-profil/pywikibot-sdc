@@ -30,7 +30,7 @@ To upload data to a file that already contains some structured data add the
 `strategy` argument to the call using one of the [named merge strategies](#merge-strategies).
 
 ### Merge strategies
-There are four allowed strategies for merging the provided data with any
+There are five allowed strategies for merging the provided data with any
 pre-existing data.
 *   `None` (default): Only upload the data if no prior data exists.
 *   `"New"`: Only upload the data if there is no prior data for any of the
@@ -42,6 +42,11 @@ pre-existing data.
 *   `"Blind"` (not generally recommended): Upload the data without regards to
         what is already there. May overwrite pre-existing captions and add
         duplicate statements.
+*   `"Nuke"` (not generally recommended): Delete all prior data before
+        uploading the new data. This should probably only be used if you
+        uploaded the original data then spotted that it was wrong. Even then
+        it's probably worth checking that the file hasn't been edited since
+        the original upload.
 
 ## SDC in-data format
 

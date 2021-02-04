@@ -20,7 +20,7 @@ from pywikibotsdc.sdc_exception import SdcException
 _COMMONS_MEDIA_FILE_SITE = None  # pywikibot.Site('commons', 'commons')
 DEFAULT_EDIT_SUMMARY = \
     'Added {count} structured data statement(s) #pwbsdc'
-STRATEGIES = ('new', 'blind', 'squeeze')
+STRATEGIES = ('new', 'blind', 'squeeze', 'nuke')
 
 
 def _get_commons():
@@ -29,6 +29,18 @@ def _get_commons():
     if not _COMMONS_MEDIA_FILE_SITE:
         _COMMONS_MEDIA_FILE_SITE = pywikibot.Site('commons', 'commons')
     return _COMMONS_MEDIA_FILE_SITE
+
+
+def _submit_data(target_site, payload):
+    """
+    Submit the Structured Data for upload.
+
+    @param target_site: pywikibot.Site where data is uploaded.
+    @param payload: request formatted for the MediaWiki Action API
+    @raises: pywikibot.data.api.APIError
+    """
+    request = target_site._simple_request(**payload)
+    request.submit()
 
 
 def upload_single_sdc_data(file_page, sdc_data, target_site=None,
@@ -50,6 +62,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     @return: Number of added statements
     @raises: ValueError, SdcException
     """
+    # support either file_name+Site or file_page as input
     if isinstance(file_page, pywikibot.FilePage):
         if target_site and target_site != file_page.site:
             raise ValueError(
@@ -94,10 +107,11 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         'summary': summary.format(count=num_statements),
         'bot': target_site.has_right('bot')
     }
+    if strategy and strategy.lower() == 'nuke':
+        payload['clear'] = 1
 
-    request = target_site._simple_request(**payload)
     try:
-        request.submit()
+        _submit_data(target_site, payload)
     except pywikibot.data.api.APIError as error:
         raise SdcException(
             'error', error, '{0} - Uploading SDC data failed: {1}'.format(
@@ -135,12 +149,11 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     @param target_site: pywikibot.Site object to which file should be uploaded
     @param sdc_data: internally formatted Structured Data in json format
     @param strategy: Strategy used for merging uploaded data with pre-existing
-        data. Allowed values are None, "New", "Blind" and "Squeeze".
+        data. Allowed values are None, "New", "Blind", "Squeeze" and "Nuke".
     @return: dict of pids and caption languages removed from sdc_data due to
         conflicts.
     @raises: ValueError, SdcException
     """
-    # @todo: Consider one more strategy: nuke (delete all pre-existing data)
     prior_data = _get_existing_structured_data(media_identifier, target_site)
     if not prior_data:
         # even unknown strategies should pass if there is no prior data
@@ -189,7 +202,7 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
                 '", "'.join([s.capitalize() for s in STRATEGIES[:-1]]),
                 STRATEGIES[-1].capitalize(),
                 strategy))
-    # pass if strategy is "Blind"
+    # pass if strategy is "Blind" or "Nuke"
 
 
 def format_sdc_payload(target_site, data):
