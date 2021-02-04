@@ -17,8 +17,8 @@ class TestSdcException(unittest.TestCase):
 
     def test_init_level_prefixes_log(self):
         E = SdcException('warning', 'data', 'log_msg')
-        self.assertEquals(E.log, 'WARNING: log_msg')
+        self.assertEqual(E.log, 'WARNING: log_msg')
 
     def test_init_log_is_msg(self):
         E = SdcException('warning', 'data', 'log_msg')
-        self.assertEquals(E.log, str(E))
+        self.assertEqual(E.log, str(E))
