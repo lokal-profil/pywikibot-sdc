@@ -2,7 +2,14 @@ Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.
 =======
 
 Support functionality to allow upload of Structured Data to [Wikimedia Commons](https://commons.wikimedia.org)
-by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot) internals.
+by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot
+internals.
+
+The library is geared towards supporting all features of Structured Data,
+meaning all data types, *prominent* flags, multiple values per property,
+multiple qualifiers per value etc. The library is however largely limited to
+uploading new data, changing already existing statements is therefore not
+currently supported.
 
 This is primarily intended as a stop-gap measure until proper support is
 implemented in Pywikibot [T223820](https://phabricator.wikimedia.org/T223820).
@@ -16,7 +23,7 @@ Heavily inspired by the following hack by Abbe98:
 You can install `pywikibot-sdc` via `pip` using:
 `pip install git+https://github.com/lokal-profil/pywikibot-sdc.git`
 
-If it is your first time running pywikibot you will also have to [set up a
+If it is your first time running Pywikibot you will also have to [set up a
 `user-config.py` file](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Configure_Pywikibot).
 
 ## To use
@@ -147,7 +154,7 @@ How a value is interpreted is based on the Property for which it is provided, th
 expected data type is loaded from the underlying Wikibase installation itself.
 
 This tool does not do any data validation so if you pass it rubbish which sort of
-looks right you'll hopefully get complaints from pywikibot or the MediaWiki API.
+looks right you'll hopefully get complaints from Pywikibot or the MediaWiki API.
 
 #### Simple string values
 
