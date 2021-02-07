@@ -2,7 +2,7 @@ Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.
 =======
 
 Support functionality to allow upload of Structured Data to [Wikimedia Commons](https://commons.wikimedia.org)
-by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot
+by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot)
 internals.
 
 The library is geared towards supporting all features of Structured Data,
