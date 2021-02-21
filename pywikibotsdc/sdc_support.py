@@ -90,8 +90,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         sdc_payload = format_sdc_payload(target_site, sdc_data)
     except Exception as error:
         raise SdcException(
-            'error', error, '{0} - Formatting SDC data failed: {1}'.format(
-                file_page.title(), error)
+            'error', error, 'Formatting SDC data failed: {0}'.format(error)
         )
 
     # upload sdc data
@@ -114,8 +113,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         _submit_data(target_site, payload)
     except pywikibot.data.api.APIError as error:
         raise SdcException(
-            'error', error, '{0} - Uploading SDC data failed: {1}'.format(
-                file_page.title(), error)
+            'error', error, 'Uploading SDC data failed: {0}'.format(error)
         )
     return num_statements
 

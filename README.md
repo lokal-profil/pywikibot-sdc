@@ -1,8 +1,8 @@
 Pywikibot-SDC [![Build Status](https://travis-ci.org/lokal-profil/pywikibot-sdc.svg?branch=master)](https://travis-ci.org/lokal-profil/pywikibot-sdc)[![codecov.io Code Coverage](https://img.shields.io/codecov/c/github/lokal-profil/pywikibot-sdc.svg)](https://codecov.io/gh/lokal-profil/pywikibot-sdc)
 =======
 
-Support functionality to allow upload of Structured Data to [Wikimedia Commons](https://commons.wikimedia.org)
-by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot)
+A library and command line application for the upload of Structured Data to
+[Wikimedia Commons](https://commons.wikimedia.org) by making use of [Pywikibot](https://www.mediawiki.org/wiki/Manual:Pywikibot)
 internals.
 
 The library is geared towards supporting all features of Structured Data,
@@ -26,7 +26,25 @@ You can install `pywikibot-sdc` via `pip` using:
 If it is your first time running Pywikibot you will also have to [set up a
 `user-config.py` file](https://www.mediawiki.org/wiki/Manual:Pywikibot/Installation#Configure_Pywikibot).
 
-## To use
+## Usage as a command line application
+
+After installation Pywikibot-SDC can be used by simply calling `pywikibotsdc PATH`
+from the command line. `PATH` is the path to a JSON file containing a
+dictionary of file names (with or without the *File:*-prefix) and the associated
+structured data to upload for each (in the format described [below](#sdc-in-data-format)).
+
+For convenience if only a single file is updated the filename can be passed via
+the `-f` flag and the JSON file should then only contain a single entry of the
+[SDC in-data](#sdc-in-data-format).
+
+To upload data to a file that already contains some structured data add the
+`--strategy` argument to the call using one of the [named merge strategies](#merge-strategies).
+
+Use the `-h` flag to see a full list of arguments. Note that the
+[global Pywikibot arguments](https://www.mediawiki.org/wiki/Manual:Pywikibot/Global_Options)
+are also supported.
+
+## Usage as a library
 
 In it's most simple form call `sdc_support.upload_single_sdc_data(file_page, sdc_data)`
 with a `pywikibot.FilePage` object (or just the filename as a string) of a
@@ -36,7 +54,10 @@ described [below](#sdc-in-data-format)).
 To upload data to a file that already contains some structured data add the
 `strategy` argument to the call using one of the [named merge strategies](#merge-strategies).
 
-### Merge strategies
+While the command line application is limited to Wikimedia Commons (and Beta
+Commons) the library should work for any MediaWiki instance.
+
+## Merge strategies
 There are five allowed strategies for merging the provided data with any
 pre-existing data.
 *   `None` (default): Only upload the data if no prior data exists.
@@ -75,7 +96,7 @@ Short example:
 }
 ```
 
-For a more extensive example suited for test-upload to [Beta Commons](https://commons.wikimedia.beta.wmflabs.org/)
+For a more extensive example, suited for test-upload to [Beta Commons](https://commons.wikimedia.beta.wmflabs.org/),
 see [docs/SDC_beta_commons_demo.json](docs/SDC_beta_commons_demo.json).
 
 #### edit_summary

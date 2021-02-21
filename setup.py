@@ -16,6 +16,7 @@ setup(
         'future',
         'mwparserfromhell',
         'setuptools>50.0.0; python_version >= "3.6"',
+        'pathlib; python_version < "3.6"',
         'pywikibot==5.5.0; python_version >= "3.6"',
         'pywikibot==3.0.20200703; python_version < "3.6"'
     ],
@@ -38,4 +39,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    entry_points={
+        "console_scripts": [
+            "pywikibotsdc=pywikibotsdc.__main__:main",
+        ]
+    },
 )
