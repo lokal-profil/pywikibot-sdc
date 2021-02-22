@@ -214,6 +214,7 @@ def format_sdc_payload(target_site, data):
     @param target_site: pywikibot.Site object to which file was uploaded
     @param data: internally formatted sdc data.
     @return: dict formated sdc data payload
+    @raises: ValueError
     """
     allowed_non_property_keys = ('caption', 'summary')
     payload = dict()
@@ -223,18 +224,25 @@ def format_sdc_payload(target_site, data):
         for k, v in data['caption'].items():
             payload['labels'][k] = {'language': k, 'value': v}
 
-    if not set(data.keys()) - set(allowed_non_property_keys):
-        return payload
-    payload['claims'] = []
-    prop_data = {key: data[key] for key in data.keys() if is_prop_key(key)}
-    for prop, value in prop_data.items():
-        if isinstance(value, list):
-            for v in value:
-                claim = make_claim(v, prop, target_site)
+    if set(data.keys()) - set(allowed_non_property_keys):
+        prop_data = {key: data[key] for key in data.keys() if is_prop_key(key)}
+        if prop_data:
+            payload['claims'] = []
+        for prop, value in prop_data.items():
+            if isinstance(value, list):
+                for v in value:
+                    claim = make_claim(v, prop, target_site)
+                    payload['claims'].append(claim.toJSON())
+            else:
+                claim = make_claim(value, prop, target_site)
                 payload['claims'].append(claim.toJSON())
-        else:
-            claim = make_claim(value, prop, target_site)
-            payload['claims'].append(claim.toJSON())
+
+    # raise error if no recognisable sdc data is found
+    if not payload:
+        raise ValueError(
+            'The provided sdc data contains no recognised labels: {}'.format(
+                ', '.join(data.keys())))
+
     return payload
 
 

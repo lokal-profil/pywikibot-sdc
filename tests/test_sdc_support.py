@@ -14,6 +14,7 @@ from pywikibotsdc.sdc_exception import SdcException
 from pywikibotsdc.sdc_support import (
     _get_existing_structured_data,
     coord_precision,
+    format_sdc_payload,
     is_prop_key,
     iso_to_wbtime,
     merge_strategy,
@@ -428,6 +429,13 @@ class TestUploadSingleSdcData(unittest.TestCase):
             upload_single_sdc_data(self.mock_file_page, self.base_sdc)
         self.assertTrue('mock error' in se.exception.log)
 
+    def test_upload_single_sdc_data_handle_sdc_formatting_error(self):
+        self.mock_format_sdc_payload.side_effect = ValueError('mock error', '')
+        with self.assertRaises(SdcException) as se:
+            upload_single_sdc_data(self.mock_file_page, self.base_sdc)
+        self.assertTrue('mock error' in se.exception.log)
+        self.mock__submit_data.not_called()
+
     def test_upload_single_sdc_data_any_non_nuke_does_not_trigger_clear(self):
         strategies = (None, 'new', 'blind', 'squeeze', 'foo')
         for strategy in strategies:
@@ -444,3 +452,58 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock__submit_data.called_once()
         payload = self.mock__submit_data.call_args[0][1]
         self.assertEqual(payload.get('clear', 0), 1)
+
+
+class TestFormatSdcPayload(unittest.TestCase):
+    """Test the format_sdc_payload method."""
+
+    def setUp(self):
+        self.mock_site = mock.MagicMock(spec=pywikibot.Site)
+
+        self.base_sdc = {
+            "caption": {
+                "en": "Foo",
+                "sv": "Bar",
+            },
+        }
+
+        # mock out anything communicating with live platforms
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support.is_prop_key')
+        self.mock_is_prop_key = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support.make_claim')
+        self.mock_make_claim = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_format_sdc_payload_error_on_no_data(self):
+        with self.assertRaises(ValueError):
+            format_sdc_payload(self.mock_site, {})
+
+    def test_format_sdc_payload_error_on_just_unknown(self):
+        self.mock_is_prop_key.return_value = False
+        with self.assertRaises(ValueError) as ve:
+            format_sdc_payload(self.mock_site, {'bar': 'foo'})
+        self.assertTrue('bar' in str(ve.exception))
+        self.mock_make_claim.not_called()
+
+    def test_format_sdc_payload_error_on_just_summary(self):
+        with self.assertRaises(ValueError) as ve:
+            format_sdc_payload(self.mock_site, {'summary': 'foo'})
+        self.assertTrue('summary' in str(ve.exception))
+        self.mock_is_prop_key.not_called()
+        self.mock_make_claim.not_called()
+
+    def test_format_sdc_payload_quick_return_on_just_caption(self):
+        expected_data = {
+            'labels': {
+                'en': {'language': 'en', 'value': 'Foo'},
+                'sv': {'language': 'sv', 'value': 'Bar'}
+            }
+        }
+        data = format_sdc_payload(self.mock_site, self.base_sdc)
+        self.mock_is_prop_key.not_called()
+        self.mock_make_claim.not_called()
+        self.assertEqual(data, expected_data)
