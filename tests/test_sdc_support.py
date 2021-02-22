@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8  -*-
-"""Unit tests for helpers.py."""
+"""Unit tests for sdc_support.py."""
 from __future__ import unicode_literals
 
 import unittest
@@ -449,7 +449,7 @@ class TestUploadSingleSdcData(unittest.TestCase):
     def test_upload_single_sdc_data_nuke_triggers_clear(self):
         upload_single_sdc_data(
             self.mock_file_page, self.base_sdc, strategy="Nuke")
-        self.mock__submit_data.called_once()
+        self.mock__submit_data.assert_called_once()
         payload = self.mock__submit_data.call_args[0][1]
         self.assertEqual(payload.get('clear', 0), 1)
 

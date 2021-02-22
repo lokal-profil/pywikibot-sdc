@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8  -*-
-"""Unit tests for helpers.py."""
+"""Unit tests for sdc_exception.py."""
 from __future__ import unicode_literals
 
 import unittest
