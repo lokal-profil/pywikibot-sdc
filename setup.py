@@ -6,8 +6,11 @@ from setuptools import setup
 version = '0.0.2'
 repo = 'pywikibot-sdc'
 
+with open("README.md", "r") as readme:
+    long_description = readme.read()
+
 setup(
-    name='Pywikibot-SDC',
+    name='pywikibot-sdc',
     packages=['pywikibotsdc'],
     install_requires=[
         'future',
@@ -18,16 +21,21 @@ setup(
     ],
     version=version,
     description='Support for importing Structured Data to Wikimedia Commons.',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author='André Costa',
     author_email='',
     url='https://github.com/lokal-profil/' + repo,
     download_url='https://github.com/lokal-profil/' + repo + '/tarball/' + version,
     keywords=['Wikimedia Commons', 'Wikimedia', 'Commons', 'pywikibot', 'API'],
+    license="MIT",
     classifiers=[
-        'Programming Language :: Python :: 2.7'
-        'Programming Language :: Python :: 3.6'
-        'Programming Language :: Python :: 3.7'
-        'Programming Language :: Python :: 3.8'
-        'Programming Language :: Python :: 3.9'
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
 )
