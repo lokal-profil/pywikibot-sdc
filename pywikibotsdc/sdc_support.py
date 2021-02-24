@@ -44,7 +44,7 @@ def _submit_data(target_site, payload):
 
 
 def upload_single_sdc_data(file_page, sdc_data, target_site=None,
-                           strategy=None, summary=None):
+                           strategy=None, summary=None, null_edit=False):
     """
     Upload the Structured Data corresponding to the recently uploaded file.
 
@@ -59,6 +59,9 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         data. Allowed values are None (default), "New" and "Blind".
     @param summary: edit summary If not provided one is looked for in the
         sdc_data, if none is found there then a default summary is used.
+    @param null_edit: If a null_edit should be performed to the page after the
+        data upload, this is needed to trigger updates to wikitext based
+        tracking templates. Defaults to False.
     @return: Number of added statements
     @raises: ValueError, SdcException
     """
@@ -115,6 +118,9 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         raise SdcException(
             'error', error, 'Uploading SDC data failed: {0}'.format(error)
         )
+    else:
+        if null_edit:
+            file_page.touch(botflag=target_site.has_right('bot'))
     return num_statements
 
 

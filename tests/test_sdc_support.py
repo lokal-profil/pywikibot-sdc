@@ -390,6 +390,7 @@ class TestUploadSingleSdcData(unittest.TestCase):
 
     def setUp(self):
         self.mock_file_page = mock.MagicMock(spec=pywikibot.FilePage)
+        self.mock_pwb_touch = self.mock_file_page.touch
 
         self.base_sdc = {
             "caption": {
@@ -398,18 +399,6 @@ class TestUploadSingleSdcData(unittest.TestCase):
             },
             "P123": "Q456",
         }
-
-        # mock out anything communicating with live platforms
-        patcher = mock.patch(
-            'pywikibotsdc.sdc_support._submit_data')
-        self.mock__submit_data = patcher.start()
-        self.addCleanup(patcher.stop)
-
-        patcher = mock.patch(
-            'pywikibotsdc.sdc_support._get_commons')
-        self.mock__get_commons = patcher.start()
-        self.mock__get_commons.return_value = mock.MagicMock(spec=pywikibot.Site)  # noqa:E501
-        self.addCleanup(patcher.stop)
 
         patcher = mock.patch(
             'pywikibotsdc.sdc_support.merge_strategy')
@@ -423,18 +412,33 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock_format_sdc_payload.return_value = {}
         self.addCleanup(patcher.stop)
 
+        # mock out anything communicating with live platforms
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support._submit_data')
+        self.mock__submit_data = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_support._get_commons')
+        self.mock__get_commons = patcher.start()
+        self.mock__get_commons.return_value = mock.MagicMock(spec=pywikibot.Site)  # noqa:E501
+        self.addCleanup(patcher.stop)
+
+
     def test_upload_single_sdc_data_handle_upload_error(self):
         self.mock__submit_data.side_effect = pywikibot.data.api.APIError('mock error', '')  # noqa:E501
         with self.assertRaises(SdcException) as se:
             upload_single_sdc_data(self.mock_file_page, self.base_sdc)
         self.assertTrue('mock error' in se.exception.log)
+        self.mock_pwb_touch.assert_not_called()
 
     def test_upload_single_sdc_data_handle_sdc_formatting_error(self):
         self.mock_format_sdc_payload.side_effect = ValueError('mock error', '')
         with self.assertRaises(SdcException) as se:
             upload_single_sdc_data(self.mock_file_page, self.base_sdc)
         self.assertTrue('mock error' in se.exception.log)
-        self.mock__submit_data.not_called()
+        self.mock__submit_data.assert_not_called()
+        self.mock_pwb_touch.assert_not_called()
 
     def test_upload_single_sdc_data_any_non_nuke_does_not_trigger_clear(self):
         strategies = (None, 'new', 'blind', 'squeeze', 'foo')
@@ -452,6 +456,19 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock__submit_data.assert_called_once()
         payload = self.mock__submit_data.call_args[0][1]
         self.assertEqual(payload.get('clear', 0), 1)
+        self.mock_pwb_touch.assert_not_called()
+
+    def test_upload_single_sdc_data_null_edit_triggers_touch(self):
+        upload_single_sdc_data(
+            self.mock_file_page, self.base_sdc, null_edit=True)
+        self.mock__submit_data.assert_called_once()
+        self.mock_pwb_touch.assert_called()
+
+    def test_upload_single_sdc_data_no_null_edit_no_touch(self):
+        upload_single_sdc_data(
+            self.mock_file_page, self.base_sdc, null_edit=False)
+        self.mock__submit_data.assert_called_once()
+        self.mock_pwb_touch.assert_not_called()
 
 
 class TestFormatSdcPayload(unittest.TestCase):
@@ -487,14 +504,14 @@ class TestFormatSdcPayload(unittest.TestCase):
         with self.assertRaises(ValueError) as ve:
             format_sdc_payload(self.mock_site, {'bar': 'foo'})
         self.assertTrue('bar' in str(ve.exception))
-        self.mock_make_claim.not_called()
+        self.mock_make_claim.assert_not_called()
 
     def test_format_sdc_payload_error_on_just_summary(self):
         with self.assertRaises(ValueError) as ve:
             format_sdc_payload(self.mock_site, {'summary': 'foo'})
         self.assertTrue('summary' in str(ve.exception))
-        self.mock_is_prop_key.not_called()
-        self.mock_make_claim.not_called()
+        self.mock_is_prop_key.assert_not_called()
+        self.mock_make_claim.assert_not_called()
 
     def test_format_sdc_payload_quick_return_on_just_caption(self):
         expected_data = {
@@ -504,6 +521,6 @@ class TestFormatSdcPayload(unittest.TestCase):
             }
         }
         data = format_sdc_payload(self.mock_site, self.base_sdc)
-        self.mock_is_prop_key.not_called()
-        self.mock_make_claim.not_called()
+        self.mock_is_prop_key.assert_not_called()
+        self.mock_make_claim.assert_not_called()
         self.assertEqual(data, expected_data)

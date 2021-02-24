@@ -66,6 +66,9 @@ def handle_args(argv=None):
         '--summary', action='store',
         help='edit summary to use instead of default')
     parser.add_argument(
+        '-n', '--null_edit', action='store_true',
+        help='perform a null_edit to the file page after uploading the data')
+    parser.add_argument(
         '-f', '--filename', action='store',
         help=('Commons filename to which Structured Data corresponds '
               '(only used when data covers a single file and the filename is '
@@ -98,7 +101,8 @@ def main():
         try:
             num = sdc_support.upload_single_sdc_data(
                 args.filename, sdc_data, target_site=site,
-                strategy=args.strategy, summary=args.summary)
+                strategy=args.strategy, summary=args.summary,
+                null_edit=args.null_edit)
         except SdcException as se:
             pywikibot.output('{0} - {1}'.format(args.filename, se.log))
         else:
@@ -110,7 +114,7 @@ def main():
             try:
                 num = sdc_support.upload_single_sdc_data(
                     filename, data, target_site=site, strategy=args.strategy,
-                    summary=args.summary)
+                    summary=args.summary, null_edit=args.null_edit)
             except SdcException as se:
                 pywikibot.output('{0} - {1}'.format(filename, se.log))
             else:
