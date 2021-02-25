@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pywikibot
 
-import pywikibotsdc.sdc_support as sdc_support
+import pywikibotsdc.sdc_upload as sdc_upload
 from pywikibotsdc.sdc_exception import SdcException
 
 
@@ -60,7 +60,7 @@ def handle_args(argv=None):
         'data', action='store', metavar='PATH', type=Path,
         help='path to file containing Structured Data in json format')
     parser.add_argument(
-        '--strategy', action='store', choices=sdc_support.STRATEGIES,
+        '--strategy', action='store', choices=sdc_upload.STRATEGIES,
         help='merge strategy to use')
     parser.add_argument(
         '--summary', action='store',
@@ -99,7 +99,7 @@ def main():
     # run
     if args.filename:
         try:
-            num = sdc_support.upload_single_sdc_data(
+            num = sdc_upload.upload_single_sdc_data(
                 args.filename, sdc_data, target_site=site,
                 strategy=args.strategy, summary=args.summary,
                 null_edit=args.null_edit)
@@ -112,7 +112,7 @@ def main():
     else:
         for filename, data in sdc_data.items():
             try:
-                num = sdc_support.upload_single_sdc_data(
+                num = sdc_upload.upload_single_sdc_data(
                     filename, data, target_site=site, strategy=args.strategy,
                     summary=args.summary, null_edit=args.null_edit)
             except SdcException as se:

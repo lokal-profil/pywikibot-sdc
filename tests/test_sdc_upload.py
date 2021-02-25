@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8  -*-
-"""Unit tests for sdc_support.py."""
+"""Unit tests for sdc_upload.py."""
 from __future__ import unicode_literals
 
 import unittest
@@ -11,7 +11,7 @@ import mock
 import pywikibot
 
 from pywikibotsdc.sdc_exception import SdcException
-from pywikibotsdc.sdc_support import (
+from pywikibotsdc.sdc_upload import (
     _get_existing_structured_data,
     coord_precision,
     format_sdc_payload,
@@ -268,7 +268,7 @@ class TestMergeStrategy(unittest.TestCase):
         }
 
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support._get_existing_structured_data')
+            'pywikibotsdc.sdc_upload._get_existing_structured_data')
         self.mock__get_existing_structured_data = patcher.start()
         self.mock__get_existing_structured_data.return_value = None
         self.addCleanup(patcher.stop)
@@ -401,25 +401,25 @@ class TestUploadSingleSdcData(unittest.TestCase):
         }
 
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support.merge_strategy')
+            'pywikibotsdc.sdc_upload.merge_strategy')
         self.mock_merge_strategy = patcher.start()
         self.mock_merge_strategy.return_value = None
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support.format_sdc_payload')
+            'pywikibotsdc.sdc_upload.format_sdc_payload')
         self.mock_format_sdc_payload = patcher.start()
         self.mock_format_sdc_payload.return_value = {}
         self.addCleanup(patcher.stop)
 
         # mock out anything communicating with live platforms
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support._submit_data')
+            'pywikibotsdc.sdc_upload._submit_data')
         self.mock__submit_data = patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support._get_commons')
+            'pywikibotsdc.sdc_upload._get_commons')
         self.mock__get_commons = patcher.start()
         self.mock__get_commons.return_value = mock.MagicMock(spec=pywikibot.Site)  # noqa:E501
         self.addCleanup(patcher.stop)
@@ -486,12 +486,12 @@ class TestFormatSdcPayload(unittest.TestCase):
 
         # mock out anything communicating with live platforms
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support.is_prop_key')
+            'pywikibotsdc.sdc_upload.is_prop_key')
         self.mock_is_prop_key = patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch(
-            'pywikibotsdc.sdc_support.make_claim')
+            'pywikibotsdc.sdc_upload.make_claim')
         self.mock_make_claim = patcher.start()
         self.addCleanup(patcher.stop)
 
