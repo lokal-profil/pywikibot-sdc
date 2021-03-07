@@ -120,7 +120,18 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         )
     else:
         if null_edit:
-            file_page.touch(botflag=target_site.has_right('bot'))
+            try:
+                file_page.touch(botflag=target_site.has_right('bot'))
+            except pywikibot.i18n.TranslationError:
+                # @todo: bump pywikibot requirement after new pip release then
+                #        drop the py3 bit of the message.
+                pywikibot.error(
+                    'The null edit could not be performed on {0} due to a bug '
+                    'in Pywikibot (T275981). For python 3 please update to '
+                    'the latest version of Pywikibot. If you are on Python 2 '
+                    'null edits will not be possible, maybe time to '
+                    'upgrade?'.format(file_page.title()))
+                raise
     return num_statements
 
 

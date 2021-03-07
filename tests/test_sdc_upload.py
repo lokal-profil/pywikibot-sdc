@@ -469,6 +469,14 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock__submit_data.assert_called_once()
         self.mock_pwb_touch.assert_not_called()
 
+    def test_upload_single_sdc_data_null_edit_T275981_adds_explanation(self):
+        self.mock_pwb_touch.side_effect = pywikibot.i18n.TranslationError('Fo')
+        with self.assertRaises(pywikibot.i18n.TranslationError):
+            upload_single_sdc_data(
+                self.mock_file_page, self.base_sdc, null_edit=True)
+        self.mock__submit_data.assert_called_once()
+        self.mock_pwb_touch.assert_called()
+
 
 class TestFormatSdcPayload(unittest.TestCase):
     """Test the format_sdc_payload method."""
