@@ -207,7 +207,7 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
             'but "{2}" was provided'.format(
                 '", "'.join([s.capitalize() for s in STRATEGIES[:-1]]),
                 STRATEGIES[-1].capitalize(),
-                strategy))
+                strategy.capitalize()))
     # pass if strategy is "Blind" or "Nuke"
 
 

@@ -296,7 +296,7 @@ class TestMergeStrategy(unittest.TestCase):
             merge_strategy(self.mid, self.mock_site, self.base_sdc, 'foo')
         self.assertTrue(
             str(ve.exception).startswith('The `strategy` parameter'))
-        self.assertTrue('foo' in str(ve.exception))
+        self.assertTrue('Foo' in str(ve.exception))
 
     def test_merge_strategy_none_strategy_some_non_conflicting_data(self):
         self.set_mock_response_data(captions={'fr': 'hello'})
@@ -423,7 +423,6 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock__get_commons = patcher.start()
         self.mock__get_commons.return_value = mock.MagicMock(spec=pywikibot.Site)  # noqa:E501
         self.addCleanup(patcher.stop)
-
 
     def test_upload_single_sdc_data_handle_upload_error(self):
         self.mock__submit_data.side_effect = pywikibot.data.api.APIError('mock error', '')  # noqa:E501
