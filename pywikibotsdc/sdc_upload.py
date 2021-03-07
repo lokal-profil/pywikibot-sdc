@@ -169,12 +169,14 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
             ('Found pre-existing SDC data, no new data will be added. '
              'Found data: {}'.format(prior_data))
         )
-    elif strategy.lower() in ('new', 'add'):
+
+    strategy = strategy.lower()
+    if strategy in ('new', 'add'):
         pre_pids = prior_data['statements'].keys()
         pre_langs = prior_data['labels'].keys()
         new_langs = sdc_data.get('caption', {}).keys()
 
-        if strategy.lower() == 'add':
+        if strategy == 'add':
             pid_clash = set(pre_pids).intersection(sdc_data.keys())
             lang_clash = set(pre_langs).intersection(new_langs)
             for pid in pid_clash:
@@ -199,7 +201,7 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
                 ('Found pre-existing SDC data, no new data will be added. '
                  'Found data: {}'.format(prior_data))
             )
-    elif strategy.lower() not in STRATEGIES:
+    elif strategy not in STRATEGIES:
         raise ValueError(
             'The `strategy` parameter must be None, "{0}" or "{1}" '
             'but "{2}" was provided'.format(
