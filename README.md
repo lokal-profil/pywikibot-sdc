@@ -64,7 +64,7 @@ pre-existing data.
 *   `"New"`: Only upload the data if there is no prior data for any of the
         claims to be added. I.e. drop all data if any of the proposed Pids or
         caption languages are already present.
-*   `"Squeeze"`: Only upload those parts of the data for which there are no
+*   `"Add"`: Only upload those parts of the data for which there are no
         prior claims. I.e. drop any statements where the Pid or caption language
         is already present.
 *   `"Blind"` (not generally recommended): Upload the data without regards to

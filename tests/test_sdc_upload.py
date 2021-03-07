@@ -283,7 +283,7 @@ class TestMergeStrategy(unittest.TestCase):
 
     def test_merge_strategy_any_strategy_no_data(self):
         # Any strategy, even an unknown one, should pass if no prior data.
-        for strategy in (None, 'new', 'blind', 'squeeze', 'nuke', 'foo'):
+        for strategy in (None, 'new', 'blind', 'add', 'nuke', 'foo'):
             input_data = deepcopy(self.base_sdc)
             r = merge_strategy(
                 self.mid, self.mock_site, input_data, strategy)
@@ -342,29 +342,29 @@ class TestMergeStrategy(unittest.TestCase):
         self.assertEqual(input_data, self.base_sdc)
         self.assertIsNone(r)
 
-    def test_merge_strategy_squeeze_strategy_some_non_conflicting_data(self):
+    def test_merge_strategy_add_strategy_some_non_conflicting_data(self):
         input_data = deepcopy(self.base_sdc)
         self.set_mock_response_data(
             captions={'fr': 'hello'}, claims={'P456': [{}]})
-        r = merge_strategy(self.mid, self.mock_site, input_data, 'Squeeze')
+        r = merge_strategy(self.mid, self.mock_site, input_data, 'Add')
         self.assertEqual(input_data, self.base_sdc)
         self.assertIsNone(r)
 
-    def test_merge_strategy_squeeze_strategy_some_conflicting_data(self):
+    def test_merge_strategy_add_strategy_some_conflicting_data(self):
         expected_data = deepcopy(self.base_sdc)
         expected_data['caption'].pop('sv')
         expected_data.pop('P123')
         self.set_mock_response_data(
             captions={'sv': 'hello', 'fr': 'hi'}, claims={'P123': [{}]})
-        r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Squeeze')
+        r = merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Add')
         self.assertEqual(self.base_sdc, expected_data)
         self.assertEqual(r, {'pids': {'P123'}, 'langs': {'sv'}})
 
-    def test_merge_strategy_squeeze_strategy_all_conflicting_data(self):
+    def test_merge_strategy_add_strategy_all_conflicting_data(self):
         self.set_mock_response_data(
             captions={'sv': 'hello', 'en': 'hi'}, claims={'P123': [{}]})
         with self.assertRaises(SdcException) as se:
-            merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Squeeze')
+            merge_strategy(self.mid, self.mock_site, self.base_sdc, 'Add')
         self.assertEqual(
             se.exception.data, 'all conflicting pre-existing sdc-data')
 
@@ -441,7 +441,7 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock_pwb_touch.assert_not_called()
 
     def test_upload_single_sdc_data_any_non_nuke_does_not_trigger_clear(self):
-        strategies = (None, 'new', 'blind', 'squeeze', 'foo')
+        strategies = (None, 'new', 'blind', 'add', 'foo')
         for strategy in strategies:
             upload_single_sdc_data(
                 self.mock_file_page, self.base_sdc, strategy=strategy)

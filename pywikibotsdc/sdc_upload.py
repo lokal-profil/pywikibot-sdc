@@ -20,7 +20,7 @@ from pywikibotsdc.sdc_exception import SdcException
 _COMMONS_MEDIA_FILE_SITE = None  # pywikibot.Site('commons', 'commons')
 DEFAULT_EDIT_SUMMARY = \
     'Added {count} structured data statement(s) #pwbsdc'
-STRATEGIES = ('new', 'blind', 'squeeze', 'nuke')
+STRATEGIES = ('new', 'blind', 'add', 'nuke')
 
 
 def _get_commons():
@@ -153,7 +153,7 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     @param target_site: pywikibot.Site object to which file should be uploaded
     @param sdc_data: internally formatted Structured Data in json format
     @param strategy: Strategy used for merging uploaded data with pre-existing
-        data. Allowed values are None, "New", "Blind", "Squeeze" and "Nuke".
+        data. Allowed values are None, "New", "Blind", "Add" and "Nuke".
     @return: dict of pids and caption languages removed from sdc_data due to
         conflicts.
     @raises: ValueError, SdcException
@@ -169,12 +169,12 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
             ('Found pre-existing SDC data, no new data will be added. '
              'Found data: {}'.format(prior_data))
         )
-    elif strategy.lower() in ('new', 'squeeze'):
+    elif strategy.lower() in ('new', 'add'):
         pre_pids = prior_data['statements'].keys()
         pre_langs = prior_data['labels'].keys()
         new_langs = sdc_data.get('caption', {}).keys()
 
-        if strategy.lower() == 'squeeze':
+        if strategy.lower() == 'add':
             pid_clash = set(pre_pids).intersection(sdc_data.keys())
             lang_clash = set(pre_langs).intersection(new_langs)
             for pid in pid_clash:
