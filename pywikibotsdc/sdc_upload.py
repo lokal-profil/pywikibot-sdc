@@ -366,9 +366,17 @@ def format_claim_value(claim, value):
         return pywikibot.WbTabularData(
             pywikibot.Page(repo.tabular_data_repository(), value))
     elif claim.type == 'monolingualtext':
+        if common.is_str(value):
+            text, _, lang = value.partition('@')
+            value = {'text': text, 'lang': lang}
+
         return pywikibot.WbMonolingualText(
             value.get('text'), value.get('lang'))
     elif claim.type == 'globe-coordinate':
+        if common.is_str(value):
+            parts = value.replace(',', '@').split('@')
+            value = {parts[1]: parts[0], parts[3]: parts[2]}
+
         # set precision to the least precise of the values
         precision = max(
             coord_precision(value.get('lat')),
@@ -378,13 +386,16 @@ def format_claim_value(claim, value):
             float(value.get('lon')),
             precision=precision)
     elif claim.type == 'quantity':
-        if isinstance(value, dict):
+        if common.is_str(value):
+            amount, _, unit = value.partition('@')
+            value = {'amount': amount, 'unit': unit}
+
+        if value.get('unit'):
             return pywikibot.WbQuantity(
                 value.get('amount'),
                 pywikibot.ItemPage(repo, value.get('unit')),
                 site=repo)
-        else:
-            return pywikibot.WbQuantity(value, site=repo)
+        return pywikibot.WbQuantity(value.get('amount'), site=repo)
     elif claim.type == 'time':
         # note that Wikidata only supports precision down to day
         # as a result pywikibot.WbTime.fromTimestr will produce an incompatible

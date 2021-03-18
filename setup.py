@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from setuptools import setup
 
-version = '0.1.0'
+version = '0.1.1'
 repo = 'pywikibot-sdc'
 
 with open("README.md", "r") as readme:

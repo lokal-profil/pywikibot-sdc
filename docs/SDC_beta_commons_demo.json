@@ -42,18 +42,24 @@
             }
         ]
     },
-    "P13432": {
-        "_": {
-            "text": "Some text",
-            "lang": "en"
-        }
-    },
-    "P477": {
-        "_": {
-            "lat": "1.0",
-            "lon": "2.0"
-        }
-    },
+    "P13432": [
+        {
+            "_": {
+                "text": "Some text",
+                "lang": "en"
+            }
+        },
+        "Lite text@sv"
+    ],
+    "P477": [
+        {
+            "_": {
+                "lat": "1.0",
+                "lon": "2.0"
+            }
+        },
+        "1.1@lat,2.1@lon"
+    ],
     "P448": [
         "File:Cress keyboard-3 sprouting other side.jpg",
         "Cress keyboard-3 sprouting top.jpg"
@@ -67,7 +73,8 @@
                 "unit": "Q499892"
             }
         },
-        "1234.56"
+        "1234.56",
+        "12.3456@Q499892"
     ],
     "P766": "1910-11-09",
     "P761": "2021-01-10T00:41:01Z",

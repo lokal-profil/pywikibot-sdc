@@ -189,8 +189,9 @@ Examples:
 *   External identifier: `"123-345"`
 *   Musical notation: `"\drums {cb hh hh hc sn sn hh hh cb}"`
 
-Additionally [items](#items), [Commons media](#commons-media), unitless [quantities](#quantity),
-[tabular data](#tabular-data-and-geo-shapes) and [geo shapes](#tabular-data-and-geo-shapes)
+Additionally [items](#items), [Commons media](#commons-media), [tabular data](#tabular-data-and-geo-shapes),
+[geo shapes](#tabular-data-and-geo-shapes), [dates](#point-in-time--date),
+[monolingual texts](#monolingual-text), [quantities](#quantity) and [coordinates](#coordinates).
 can be supplied as simple strings here. The assumptions made for this convenience
 are described in the relevant sections below.
 
@@ -233,13 +234,13 @@ settings) so "2020-12-31" and "2020-12-31T23:59:59Z" will result in the same out
 
 Example values:
 *   Fully qualified date: `"2020-12-31"` or `"2020-12-31T23:59:59Z"`
-*   Year and month only: `2020-12`
-*   Year only: `2020`
+*   Year and month only: `"2020-12"`
+*   Year only: `"2020"`
 
 #### Monolingual text
 
-Monolingual text requires the value be supplied as a dictionary with the keys
-`text` (a plain text string) and `lang` is the [language code](https://www.wikidata.org/wiki/Help:Monolingual_text_languages).
+Monolingual text requires the value be supplied either as a dictionary with the
+keys `text` (a plain text string) and `lang` is the [language code](https://www.wikidata.org/wiki/Help:Monolingual_text_languages).
 
 Example values:
 ```json
@@ -255,6 +256,9 @@ Example values:
 }
 ```
 
+Or as a plain string in the format `text@lang` e.g. `"Spider@en"` or
+`"Hämppi@fit"`. In this format the text cannot contain an `@` sign.
+
 #### Quantity
 
 Quantities can either be supplied with or without units. If no unit is to be used
@@ -262,9 +266,10 @@ then the value must be supplied as a plain string using "." as a decimal sign.
 
 Example: `"123.4"`
 
-If the quantity comes with a unit then it must be provided as a dictionary with
-the `amount` and `unit` keys. The value of `unit` should be the Qid corresponding
-to the unit on the used Wikibase installation.
+If the quantity comes with a unit then it must be provided either as a dictionary
+with the `amount` and `unit` keys or as a plain string in the format `amount@unit`.
+The value of `unit` should be the Qid corresponding to the unit on the used
+Wikibase installation.
 
 Example (using [kg](https://www.wikidata.org/wiki/Q11570) as the unit):
 ```json
@@ -273,11 +278,15 @@ Example (using [kg](https://www.wikidata.org/wiki/Q11570) as the unit):
     "unit": "Q11570"
 }
 ```
+or
+`"123.4@Q11570"`.
 
 #### Coordinates
 
-Coordinates are supplied as as a dictionary with `lat` and `lon` keys where the
-longitude and latitude values are provided as strings in decimal format.
+Coordinates are supplied as as either a dictionary with `lat` and `lon` keys or
+as a plain string in the format `lat_value@lat,lon_value@lon` or
+`lon_value@lon,lat_value@lat`. The longitude and latitude values are provided as
+strings in decimal format using "." as a decimal sign.
 Example:
 ```json
 {
@@ -285,6 +294,7 @@ Example:
     "lon": "13.199167"
 }
 ```
+or either `"55.708333@lat,13.199167@lon"` or `"13.199167@lon,55.708333@lat"`.
 
 Note that the number of significant figures provided is used to determine the
 precision of the coordinate. So `{"lat": "55.7", "lon": "13.2"}` will be interpreted

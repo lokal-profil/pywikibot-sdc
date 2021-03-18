@@ -599,6 +599,13 @@ class TestFormatClaimValue(unittest.TestCase):
             self.mock_claim, {'text': 'Foo', 'lang': 'sv'})
         self.assertEqual(data, expected_data)
 
+    def test_format_claim_value_monolingual_oneliner(self):
+        self.set_claim_type('monolingualtext')
+        expected_data = pywikibot.WbMonolingualText('Foo', 'sv')
+
+        data = format_claim_value(self.mock_claim, 'Foo@sv')
+        self.assertEqual(data, expected_data)
+
     def test_format_claim_value_unitless_quantity(self):
         self.set_claim_type('quantity')
         expected_data = pywikibot.WbQuantity(12.34, site=self.mock_site)
@@ -613,6 +620,14 @@ class TestFormatClaimValue(unittest.TestCase):
 
         data = format_claim_value(
             self.mock_claim, {'amount': '12.34', 'unit': 'Q123'})
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_unitfull_quantity_oneliner(self):
+        self.set_claim_type('quantity')
+        unit = pywikibot.ItemPage(self.mock_site, 'Q123')
+        expected_data = pywikibot.WbQuantity(12.34, unit, site=self.mock_site)
+
+        data = format_claim_value(self.mock_claim, '12.34@Q123')
         self.assertEqual(data, expected_data)
 
     def test_format_claim_value_time(self):
@@ -646,6 +661,30 @@ class TestFormatClaimValue(unittest.TestCase):
         data = format_claim_value(
             self.mock_claim, {'lat': '55.70', 'lon': '13.19'})
         self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_coord_oneliner_lat_first(self):
+        self.set_claim_type('globe-coordinate')
+        expected_data = pywikibot.Coordinate(55.7, 13.19, precision=0.1)
+
+        data = format_claim_value(self.mock_claim, '55.70@lat,13.19@lon')
+        self.assertEqual(data, expected_data)
+        self.assertEqual(self.mock_coord_precision.call_count, 2)
+
+    def test_format_claim_value_coord_oneliner_lon_first(self):
+        self.set_claim_type('globe-coordinate')
+        expected_data = pywikibot.Coordinate(55.7, 13.19, precision=0.1)
+
+        data = format_claim_value(self.mock_claim, '13.19@lon,55.70@lat')
+        self.assertEqual(data, expected_data)
+        self.assertEqual(self.mock_coord_precision.call_count, 2)
+
+    def test_format_claim_value_coord_oneliner_allow_space(self):
+        self.set_claim_type('globe-coordinate')
+        expected_data = pywikibot.Coordinate(55.7, 13.19, precision=0.1)
+
+        data = format_claim_value(self.mock_claim, '55.70@lat, 13.19@lon')
+        self.assertEqual(data, expected_data)
+        self.assertEqual(self.mock_coord_precision.call_count, 2)
 
     def test_format_claim_value_strings(self):
         string_types = ('string', 'url', 'math', 'external-id',
