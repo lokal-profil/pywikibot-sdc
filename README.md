@@ -262,7 +262,7 @@ then the value must be supplied as a plain string using "." as a decimal sign.
 
 Example: `"123.4"`
 
-If the quantity comes with a unit then it most be provided as a dictionary with
+If the quantity comes with a unit then it must be provided as a dictionary with
 the `value` and `unit` keys. The value of `unit` should be the Qid corresponding
 to the unit on the used Wikibase installation.
 
