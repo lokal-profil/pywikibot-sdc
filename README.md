@@ -263,13 +263,13 @@ then the value must be supplied as a plain string using "." as a decimal sign.
 Example: `"123.4"`
 
 If the quantity comes with a unit then it must be provided as a dictionary with
-the `value` and `unit` keys. The value of `unit` should be the Qid corresponding
+the `amount` and `unit` keys. The value of `unit` should be the Qid corresponding
 to the unit on the used Wikibase installation.
 
 Example (using [kg](https://www.wikidata.org/wiki/Q11570) as the unit):
 ```json
 {
-    "value": "123.4",
+    "amount": "123.4",
     "unit": "Q11570"
 }
 ```
