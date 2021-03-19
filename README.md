@@ -46,7 +46,7 @@ are also supported.
 
 ## Usage as a library
 
-In it's most simple form call `sdc_upload.upload_single_sdc_data(file_page, sdc_data)`
+In its most simple form call `sdc_upload.upload_single_sdc_data(file_page, sdc_data)`
 with a `pywikibot.FilePage` object (or just the filename as a string) of a
 newly uploaded file and the associated structured data to upload (in the format
 described [below](#sdc-in-data-format)).
@@ -233,7 +233,7 @@ settings) so "2020-12-31" and "2020-12-31T23:59:59Z" will result in the same out
 
 Example values:
 *   Fully qualified date: `"2020-12-31"` or `"2020-12-31T23:59:59Z"`
-*   Year adnd month only: `2020-12`
+*   Year and month only: `2020-12`
 *   Year only: `2020`
 
 #### Monolingual text
