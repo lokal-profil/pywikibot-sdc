@@ -14,6 +14,7 @@ from pywikibotsdc.sdc_exception import SdcException
 from pywikibotsdc.sdc_upload import (
     _get_existing_structured_data,
     coord_precision,
+    format_claim_value,
     format_sdc_payload,
     is_prop_key,
     iso_to_wbtime,
@@ -165,6 +166,8 @@ class TestGetExistingStructuredData(unittest.TestCase):
 
     def setUp(self):
         self.mid = 'M102303'
+        # specing as a pywikibot.Site object makes overriding _simple_request
+        # needlessly convoluted
         self.mock_site = mock.MagicMock()
 
     def set_mock_response_data(self, sdc):
@@ -257,7 +260,7 @@ class TestMergeStrategy(unittest.TestCase):
 
     def setUp(self):
         self.mid = 'M123'
-        self.mock_site = mock.MagicMock()
+        self.mock_site = mock.MagicMock(spec=pywikibot.Site)
 
         self.base_sdc = {
             "caption": {
@@ -531,3 +534,95 @@ class TestFormatSdcPayload(unittest.TestCase):
         self.mock_is_prop_key.assert_not_called()
         self.mock_make_claim.assert_not_called()
         self.assertEqual(data, expected_data)
+
+
+class TestFormatClaimValue(unittest.TestCase):
+    """Test the format_claim_value method."""
+
+    def setUp(self):
+        # Actually fully mocking a site object is a sisyphean task, so point it
+        # to a site where we can at least not do any harm
+        self.mock_site = pywikibot.Site('beta', 'wikidata')
+        self.mock_commons = pywikibot.Site('beta', 'commons')
+
+        self.mock_claim = mock.MagicMock(spec=pywikibot.Claim)
+        type(self.mock_claim).repo = mock.PropertyMock(
+            return_value=self.mock_site)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_upload._get_commons')
+        self.mock__get_commons = patcher.start()
+        self.mock__get_commons.return_value = self.mock_commons
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_upload.iso_to_wbtime')
+        self.mock_iso_to_wbtime = patcher.start()
+        self.mock_iso_to_wbtime.return_value = 'iso_to_wbtime return value'
+        self.addCleanup(patcher.stop)
+
+    def set_claim_type(self, val):
+        type(self.mock_claim).type = mock.PropertyMock(return_value=val)
+
+    def test_format_claim_value_item(self):
+        self.set_claim_type('wikibase-item')
+        expected_data = pywikibot.ItemPage(self.mock_site, 'Q123')
+
+        data = format_claim_value(self.mock_claim, 'Q123')
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_filepage_w_namespace(self):
+        self.set_claim_type('commonsMedia')
+        expected_data = pywikibot.FilePage(self.mock_commons, 'File:Foo.jpg')
+
+        data = format_claim_value(self.mock_claim, 'File:Foo.jpg')
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_filepage_wo_namespace(self):
+        self.set_claim_type('commonsMedia')
+        expected_data = pywikibot.FilePage(self.mock_commons, 'File:Foo.jpg')
+
+        data = format_claim_value(self.mock_claim, 'Foo.jpg')
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_monolingual(self):
+        self.set_claim_type('monolingualtext')
+        expected_data = pywikibot.WbMonolingualText('Foo', 'sv')
+
+        data = format_claim_value(
+            self.mock_claim, {'text': 'Foo', 'lang': 'sv'})
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_unitless_quantity(self):
+        self.set_claim_type('quantity')
+        expected_data = pywikibot.WbQuantity(12.34, site=self.mock_site)
+
+        data = format_claim_value(self.mock_claim, '12.34')
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_unitfull_quantity(self):
+        self.set_claim_type('quantity')
+        unit = pywikibot.ItemPage(self.mock_site, 'Q123')
+        expected_data = pywikibot.WbQuantity(12.34, unit, site=self.mock_site)
+
+        data = format_claim_value(
+            self.mock_claim, {'amount': '12.34', 'unit': 'Q123'})
+        self.assertEqual(data, expected_data)
+
+    def test_format_claim_value_time(self):
+        self.set_claim_type('time')
+        expected_data = 'iso_to_wbtime return value'
+
+        data = format_claim_value(self.mock_claim, '2021-03-02')
+        self.assertEqual(data, expected_data)
+        self.mock_iso_to_wbtime.assert_called_once_with('2021-03-02')
+
+    def test_format_claim_value_strings(self):
+        string_types = ('string', 'url', 'math', 'external-id',
+                        'musical-notation', 'unknown')
+        for st in string_types:
+            self.set_claim_type('st')
+            expected_data = 'foobar'
+
+            data = format_claim_value(self.mock_claim, 'foobar')
+            self.assertEqual(data, expected_data)
