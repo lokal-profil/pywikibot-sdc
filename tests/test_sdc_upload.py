@@ -561,6 +561,12 @@ class TestFormatClaimValue(unittest.TestCase):
         self.mock_iso_to_wbtime.return_value = 'iso_to_wbtime return value'
         self.addCleanup(patcher.stop)
 
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_upload.coord_precision')
+        self.mock_coord_precision = patcher.start()
+        self.mock_coord_precision.return_value = 0.1
+        self.addCleanup(patcher.stop)
+
     def set_claim_type(self, val):
         type(self.mock_claim).type = mock.PropertyMock(return_value=val)
 
@@ -616,6 +622,30 @@ class TestFormatClaimValue(unittest.TestCase):
         data = format_claim_value(self.mock_claim, '2021-03-02')
         self.assertEqual(data, expected_data)
         self.mock_iso_to_wbtime.assert_called_once_with('2021-03-02')
+
+    def test_format_claim_value_coord(self):
+        self.set_claim_type('globe-coordinate')
+        expected_data = pywikibot.Coordinate(55.7, 13.19, precision=0.1)
+
+        data = format_claim_value(
+            self.mock_claim, {'lat': '55.70', 'lon': '13.19'})
+        self.assertEqual(data, expected_data)
+        self.assertEqual(self.mock_coord_precision.call_count, 2)
+
+    def test_format_claim_value_coord_use_lesser_precision(self):
+        self.set_claim_type('globe-coordinate')
+        expected_data = pywikibot.Coordinate(55.7, 13.19, precision=1)
+
+        self.mock_coord_precision.side_effect = [0.1, 1]
+        data = format_claim_value(
+            self.mock_claim, {'lat': '55.70', 'lon': '13.19'})
+        self.assertEqual(data, expected_data)
+
+        # ensure order of precisions are irrelevant
+        self.mock_coord_precision.side_effect = [1, 0.1]
+        data = format_claim_value(
+            self.mock_claim, {'lat': '55.70', 'lon': '13.19'})
+        self.assertEqual(data, expected_data)
 
     def test_format_claim_value_strings(self):
         string_types = ('string', 'url', 'math', 'external-id',
