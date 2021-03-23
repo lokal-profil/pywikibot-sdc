@@ -76,7 +76,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
         target_site = target_site or _get_commons()
         file_page = pywikibot.FilePage(target_site, file_page)
 
-    media_identifier = 'M{}'.format(file_page.pageid)
+    media_identifier = get_media_identifier(file_page)
 
     # check if there is Structured Data already and resolve what to do
     # raise SdcException if merge is not possible
@@ -130,6 +130,30 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
                     'upgrade?'.format(file_page.title()))
                 raise
     return num_statements
+
+
+def get_media_identifier(file_page):
+    """
+    Resolve the file page target and return the corresponding Mid.
+
+    If the file page is a redirect then return the Mid corresponding to the
+    redirection target.
+
+    @param file_page: pywikibot.FilePage object.
+    @return The Mid media identifier.
+    @raises: pywikibot.NoPage
+    """
+    if file_page.isRedirectPage():
+        old_title = file_page.title()
+        file_page = file_page.getRedirectTarget()
+        pywikibot.log(
+            '{0} - Was a redirect, editing the target "{1}" instead.'.format(
+                old_title, file_page.title()))
+
+    if not file_page.exists():
+        raise pywikibot.NoPage(file_page)
+
+    return 'M{}'.format(file_page.pageid)
 
 
 def _get_existing_structured_data(media_identifier, target_site):

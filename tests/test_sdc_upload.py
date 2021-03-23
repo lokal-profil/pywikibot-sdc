@@ -427,6 +427,12 @@ class TestUploadSingleSdcData(unittest.TestCase):
         self.mock__get_commons.return_value = mock.MagicMock(spec=pywikibot.Site)  # noqa:E501
         self.addCleanup(patcher.stop)
 
+        patcher = mock.patch(
+            'pywikibotsdc.sdc_upload.get_media_identifier')
+        self.mock_get_media_identifier = patcher.start()
+        self.mock_get_media_identifier.return_value = 'M123'
+        self.addCleanup(patcher.stop)
+
     def test_upload_single_sdc_data_handle_upload_error(self):
         self.mock__submit_data.side_effect = pywikibot.data.api.APIError('mock error', '')  # noqa:E501
         with self.assertRaises(SdcException) as se:
