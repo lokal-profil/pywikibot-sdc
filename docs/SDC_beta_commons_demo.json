@@ -25,7 +25,9 @@
         "P31": "Some text",
         "P116": [
             "Q12",
-            "Q11"
+            "Q11",
+            "_some_value_",
+            "_no_value_"
         ],
         "P13432": {
             "text": "Some text",

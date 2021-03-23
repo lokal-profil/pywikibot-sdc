@@ -177,6 +177,11 @@ expected data type is loaded from the underlying Wikibase installation itself.
 This tool does not do any data validation so if you pass it rubbish which sort of
 looks right you'll hopefully get complaints from Pywikibot or the MediaWiki API.
 
+Wikibase supports [two special value types](https://www.mediawiki.org/wiki/Wikibase/DataModel/Primer#unknown),
+"no value" and "unknown value" which can be used independently of the data type
+of the property. To use one of these set the `<value>` to `_no_value_` or
+`_some_value_`.
+
 #### Simple string values
 
 Many data types simply consist of a string value. This includes:

@@ -297,7 +297,7 @@ def make_claim(value, prop, target_site):
     repo = target_site.data_repository()
     claim = pywikibot.Claim(repo, prop)
     if common.is_str(value):
-        claim.setTarget(format_claim_value(claim, value))
+        _set_claim_target(claim, value)
     elif isinstance(value, dict):
         set_complex_claim_value(value, claim)
     else:
@@ -318,7 +318,7 @@ def set_complex_claim_value(value, claim):
     @return: pywikibot.Claim
     """
     # more complex data types or values with e.g. qualifiers
-    claim.setTarget(format_claim_value(claim, value['_']))
+    _set_claim_target(claim, value['_'])
 
     # set prominent flag
     if value.get('prominent'):
@@ -359,12 +359,24 @@ def format_qualifier_claim_value(value, prop, claim):
             value = value.get('_')
 
         qual_claim = pywikibot.Claim(claim.repo, prop)
-        qual_claim.setTarget(
-            format_claim_value(qual_claim, value))
+        _set_claim_target(qual_claim, value)
         return qual_claim
     else:
         raise ValueError(
             'Incorrectly formatted qualifier: {}'.format(value))
+
+
+def _set_claim_target(claim, value):
+    """
+    Set the target value, or value type, of a claim.
+
+    @param claim: pywikibot.Claim to which value should be added
+    @param value: str|dict encoding the value to be added
+    """
+    if common.is_str(value) and value in ('_some_value_', '_no_value_'):
+        claim.setSnakType(value.replace('_', ''))
+    else:
+        claim.setTarget(format_claim_value(claim, value))
 
 
 def format_claim_value(claim, value):
