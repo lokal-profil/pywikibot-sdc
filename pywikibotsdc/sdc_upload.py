@@ -84,7 +84,7 @@ def upload_single_sdc_data(file_page, sdc_data, target_site=None,
     if skipped:
         pywikibot.log(
             '{0} - Conflict with existing values. Dropping the following '
-            'properties and caption languages{}.'.format(
+            'properties and caption languages{1}.'.format(
                 file_page.title(),
                 ', '.join([', '.join(v) for v in skipped.values()])))
 
