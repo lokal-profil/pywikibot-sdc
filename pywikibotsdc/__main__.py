@@ -110,6 +110,7 @@ def main():
                 '{0} - Successfully uploaded with {1} statements'.format(
                     args.filename, num))
     else:
+        total = {'files': 0, 'num': 0}
         for filename, data in sdc_data.items():
             try:
                 num = sdc_upload.upload_single_sdc_data(
@@ -118,9 +119,14 @@ def main():
             except SdcException as se:
                 pywikibot.output('{0} - {1}'.format(filename, se.log))
             else:
+                total['files'] += 1
+                total['num'] += num
                 pywikibot.output(
                     '{0} - Successfully uploaded with {1} statements'.format(
                         filename, num))
+        pywikibot.output(
+            'Successfully uploaded {num} statements to {files} files'.format(
+                **total))
 
 
 if __name__ == "__main__":
