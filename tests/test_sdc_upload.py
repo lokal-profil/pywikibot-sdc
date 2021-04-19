@@ -205,9 +205,11 @@ class TestGetExistingStructuredData(unittest.TestCase):
             'type': 'mediainfo', 'id': 'M102303',
             'labels': {'en': {'language': 'en', 'value': 'hello'}},
             'descriptions': {}, 'statements': []}
+        expected = data.copy()
+        expected['statements'] = {}
         self.set_mock_response_data(data)
         result = _get_existing_structured_data(self.mid, self.mock_site)
-        self.assertEqual(result, data)
+        self.assertEqual(result, expected)
 
     def test_get_existing_structured_data_has_statement(self):
         data = {

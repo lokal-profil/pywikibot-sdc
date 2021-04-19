@@ -174,6 +174,10 @@ def _get_existing_structured_data(media_identifier, target_site):
     data = raw.get('entities').get(media_identifier)
     if ('missing' not in data.keys()
             and (data.get('labels') or data.get('statements'))):
+        # statements are a list when empty but dict when populated,
+        # changing empty to also be a dict for consistency
+        if not data.get('statements'):
+            data['statements'] = dict()
         return data
 
 
@@ -206,7 +210,7 @@ def merge_strategy(media_identifier, target_site, sdc_data, strategy):
     if strategy in ('new', 'add'):
         pre_pids = prior_data['statements'].keys()
         pre_langs = prior_data['labels'].keys()
-        new_langs = sdc_data.get('caption', {}).keys()
+        new_langs = sdc_data.get('caption', dict()).keys()
 
         if strategy == 'add':
             pid_clash = set(pre_pids).intersection(sdc_data.keys())
